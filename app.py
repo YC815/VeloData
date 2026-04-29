@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from flask import Flask, render_template, redirect, request, url_for
 from dotenv import load_dotenv, set_key, find_dotenv
 import requests
@@ -48,6 +48,97 @@ def format_duration(seconds):
     return f"{h}h {m:02d}m" if h else f"{m}m"
 
 
+def fetch_activities_90d(header):
+    after_ts = int((datetime.now(timezone.utc) - timedelta(days=90)).timestamp())
+    resp = requests.get(
+        "https://www.strava.com/api/v3/athlete/activities",
+        headers=header,
+        params={'per_page': 100, 'after': after_ts}
+    )
+    if resp.status_code == 401:
+        return None  # caller handles re-auth
+    resp.raise_for_status()
+    return resp.json()
+
+
+def calc_pmc(activities_raw):
+    # CTL bootstrapped from 0; converges after ~84 days of data
+    tss_by_date = {}
+    has_suffer_fallback = False
+
+    for act in activities_raw:
+        local_dt = datetime.fromisoformat(act.get('start_date_local', '1970-01-01T00:00:00Z').rstrip('Z'))
+        act_date = local_dt.date()
+
+        if act.get('device_watts') and act.get('weighted_average_watts'):
+            tss = calc_tss(act['moving_time'], act['weighted_average_watts'], FTP)
+            if tss:
+                tss_by_date[act_date] = tss_by_date.get(act_date, 0.0) + tss
+        elif act.get('suffer_score'):
+            tss_by_date[act_date] = tss_by_date.get(act_date, 0.0) + act['suffer_score']
+            has_suffer_fallback = True
+
+    today = datetime.now(timezone.utc).date()
+    start = today - timedelta(days=89)
+
+    ctl, atl = 0.0, 0.0
+    labels, ctl_series, atl_series, tsb_series = [], [], [], []
+
+    current = start
+    while current <= today:
+        tss_today = tss_by_date.get(current, 0.0)
+        ctl = ctl + (tss_today - ctl) / 42
+        atl = atl + (tss_today - atl) / 7
+        tsb = ctl - atl
+        labels.append(current.strftime('%m/%d'))
+        ctl_series.append(round(ctl, 1))
+        atl_series.append(round(atl, 1))
+        tsb_series.append(round(tsb, 1))
+        current += timedelta(days=1)
+
+    return {
+        'labels': labels,
+        'ctl': ctl_series,
+        'atl': atl_series,
+        'tsb': tsb_series,
+        'current_ctl': ctl_series[-1],
+        'current_atl': atl_series[-1],
+        'current_tsb': tsb_series[-1],
+        'has_suffer_fallback': has_suffer_fallback,
+    }
+
+
+def calc_tsb_status(tsb):
+    if tsb > 5:
+        return {'color': 'green', 'label': '狀態良好，可高強度', 'tw_class': 'bg-green-500'}
+    if tsb > 0:
+        return {'color': 'yellow', 'label': '輕微疲勞，建議Z2有氧', 'tw_class': 'bg-yellow-400'}
+    if tsb > -10:
+        return {'color': 'orange', 'label': '中度疲勞，注意恢復', 'tw_class': 'bg-orange-400'}
+    return {'color': 'red', 'label': '過度訓練，強制休息', 'tw_class': 'bg-red-500'}
+
+
+def calc_wuling_time(ftp, weight_kg):
+    if not weight_kg:
+        return {'time_display': '—', 'speed_kmh': None, 'sub_three': False, 'note': '未設定體重'}
+    total_mass = weight_kg + 8  # bike weight
+    speed_ms = (ftp * 0.90 * 0.98) / (total_mass * 9.81 * 0.028)
+    time_sec = 102000 / speed_ms
+    return {
+        'time_display': format_duration(int(time_sec)),
+        'speed_kmh': round(speed_ms * 3.6, 1),
+        'sub_three': time_sec < 10800,
+        'note': None,
+    }
+
+
+def calc_ftp_progress(ftp, weight_kg):
+    target = 300
+    progress_pct = min(round(ftp / target * 100), 100)
+    w_per_kg = round(ftp / weight_kg, 2) if weight_kg else None
+    return {'current': ftp, 'target': target, 'progress_pct': progress_pct, 'w_per_kg': w_per_kg}
+
+
 def enrich_activity(act):
     local_dt = datetime.fromisoformat(act.get('start_date_local', '1970-01-01T00:00:00Z').rstrip('Z'))
     utc_dt = datetime.fromisoformat(act.get('start_date', '1970-01-01T00:00:00Z').rstrip('Z'))
@@ -55,6 +146,32 @@ def enrich_activity(act):
     tss = None
     if act.get('device_watts') and act.get('weighted_average_watts'):
         tss = calc_tss(act['moving_time'], act['weighted_average_watts'], FTP)
+
+    if_value = None
+    interpretation = None
+    if act.get('device_watts') and act.get('weighted_average_watts'):
+        if_value = round(act['weighted_average_watts'] / FTP, 2)
+        if if_value < 0.75:
+            interpretation = '恢復騎，隔天可繼續練'
+        elif if_value < 0.85:
+            interpretation = '有氧耐力訓練'
+        elif if_value < 0.95:
+            interpretation = '甜區/閾值訓練'
+        elif if_value < 1.05:
+            interpretation = 'VO2max 強度'
+        else:
+            interpretation = '全力噴發，建議休息24h'
+
+    recovery_note = None
+    if tss is not None:
+        if tss < 50:
+            recovery_note = '低負荷，恢復迅速'
+        elif tss < 100:
+            recovery_note = '中等強度，建議休息12-16h'
+        elif tss < 150:
+            recovery_note = '高負荷，建議休息24h'
+        else:
+            recovery_note = '極高負荷，建議休息48h'
 
     return {
         'name': act.get('name', '未命名'),
@@ -74,6 +191,9 @@ def enrich_activity(act):
         'avg_hr': round(act['average_heartrate']) if act.get('has_heartrate') and act.get('average_heartrate') else None,
         'suffer_score': act.get('suffer_score'),
         'tss': tss,
+        'if_value': if_value,
+        'interpretation': interpretation,
+        'recovery_note': recovery_note,
     }
 
 
@@ -132,7 +252,6 @@ def index():
         access_token = refresh_strava_token()
     except requests.HTTPError as e:
         if e.response.status_code == 401:
-            # Refresh token revoked or scope changed — re-auth
             os.environ.pop('STRAVA_REFRESH_TOKEN', None)
             set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
             return redirect(url_for('auth'))
@@ -144,18 +263,13 @@ def index():
     athlete_resp.raise_for_status()
     athlete = athlete_resp.json()
 
-    acts_resp = requests.get(
-        "https://www.strava.com/api/v3/athlete/activities",
-        headers=header,
-        params={'per_page': 30}
-    )
-    if acts_resp.status_code == 401:
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
         return redirect(url_for('auth'))
-    acts_resp.raise_for_status()
 
-    activities = [enrich_activity(a) for a in acts_resp.json()]
+    activities = [enrich_activity(a) for a in acts_raw]
 
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
     week_start = (now_utc - timedelta(days=now_utc.weekday())).replace(
@@ -167,6 +281,21 @@ def index():
     weekly_km = round(sum(a['distance_km'] for a in this_week), 1)
     weekly_time = format_duration(sum(a['moving_time_sec'] for a in this_week))
 
+    weight_kg = athlete.get('weight') or 0.0
+    weight_was_estimated = not athlete.get('weight')
+
+    pmc = calc_pmc(acts_raw)
+    chart_data = {
+        'labels': pmc['labels'][-42:],
+        'ctl': pmc['ctl'][-42:],
+        'atl': pmc['atl'][-42:],
+        'tsb': pmc['tsb'][-42:],
+    }
+
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    ftp_progress = calc_ftp_progress(FTP, weight_kg)
+    wuling = calc_wuling_time(FTP, weight_kg)
+
     return render_template(
         'index.html',
         activities=activities[:5],
@@ -175,6 +304,12 @@ def index():
         weekly_tss=weekly_tss,
         weekly_km=weekly_km,
         weekly_time=weekly_time,
+        pmc=pmc,
+        chart_data=chart_data,
+        tsb_status=tsb_status,
+        ftp_progress=ftp_progress,
+        wuling=wuling,
+        weight_was_estimated=weight_was_estimated,
     )
 
 
