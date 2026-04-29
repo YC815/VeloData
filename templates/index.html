@@ -250,16 +250,24 @@
             <h2 class="text-lg font-bold text-slate-300">Performance Management Chart</h2>
             <p class="text-xs text-slate-500 mt-0.5">過去 42 天體能管理趨勢</p>
           </div>
-          <div class="flex gap-2 flex-wrap justify-end">
-            <span class="bg-blue-900/40 border border-blue-800/50 text-blue-300 text-xs px-3 py-1 rounded-full font-mono">
+          <div class="flex gap-2 flex-wrap justify-end items-center">
+            <span
+              class="bg-blue-900/40 border border-blue-800/50 text-blue-300 text-xs px-3 py-1 rounded-full font-mono cursor-help"
+              title="CTL 慢性訓練負荷：42 天加權平均，代表長期體能基礎"
+            >
               CTL {{ pmc.current_ctl }}
             </span>
-            <span class="bg-orange-900/40 border border-orange-800/50 text-orange-300 text-xs px-3 py-1 rounded-full font-mono">
+            <span
+              class="bg-orange-900/40 border border-orange-800/50 text-orange-300 text-xs px-3 py-1 rounded-full font-mono cursor-help"
+              title="ATL 急性訓練負荷：7 天加權平均，代表近期疲勞程度"
+            >
               ATL {{ pmc.current_atl }}
             </span>
-            <span class="text-xs px-3 py-1 rounded-full font-mono
+            <span class="text-xs px-3 py-1 rounded-full font-mono cursor-help
               {% if pmc.current_tsb >= 0 %}bg-green-900/40 border border-green-800/50 text-green-300
-              {% else %}bg-red-900/40 border border-red-800/50 text-red-300{% endif %}">
+              {% else %}bg-red-900/40 border border-red-800/50 text-red-300{% endif %}"
+              title="TSB 訓練壓力平衡 = CTL − ATL。正值恢復良好，負值疲勞累積中"
+            >
               TSB {% if pmc.current_tsb > 0 %}+{% endif %}{{ pmc.current_tsb }}
             </span>
           </div>
@@ -267,9 +275,49 @@
         <div class="relative h-56">
           <canvas id="pmcChart"></canvas>
         </div>
-        {% if pmc.has_suffer_fallback %}
-        <p class="text-xs text-slate-600 mt-3">* 部分活動使用 Suffer Score 代替 TSS（無功率計），數值僅供參考</p>
-        {% endif %}
+        <!-- Toggle button -->
+        <div class="flex justify-end mt-3">
+          <button
+            id="pmcLegendToggle"
+            onclick="togglePmcLegend()"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500 transition text-xs"
+          >
+            <svg id="pmcLegendIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span id="pmcLegendLabel">圖說</span>
+          </button>
+        </div>
+        <!-- Legend panel -->
+        <div id="pmcLegend" class="hidden mt-3 pt-4 border-t border-slate-800">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs mb-4">
+            <div class="flex gap-2.5 items-start">
+              <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-blue-400 flex-shrink-0"></span>
+              <div>
+                <span class="text-slate-300 font-semibold">CTL（慢性訓練負荷）</span>
+                <p class="text-slate-500 mt-0.5 leading-relaxed">42 天加權平均，代表長期體能基礎。上升緩慢，需數週才能明顯變化。</p>
+              </div>
+            </div>
+            <div class="flex gap-2.5 items-start">
+              <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-orange-400 flex-shrink-0"></span>
+              <div>
+                <span class="text-slate-300 font-semibold">ATL（急性訓練負荷）</span>
+                <p class="text-slate-500 mt-0.5 leading-relaxed">7 天加權平均，代表近期疲勞程度。訓練後快速攀升，休息後快速消退。</p>
+              </div>
+            </div>
+            <div class="flex gap-2.5 items-start">
+              <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0"></span>
+              <div>
+                <span class="text-slate-300 font-semibold">TSB（訓練壓力平衡）</span>
+                <p class="text-slate-500 mt-0.5 leading-relaxed">= CTL − ATL。正值恢復良好，負值疲勞中。理想比賽窗口 +5 到 +20。</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800/50 rounded-xl p-3 text-xs text-slate-400 leading-relaxed">
+            <span class="text-slate-300 font-semibold">怎麼看這張圖：</span>
+            CTL 長期穩定向上為佳；ATL 訓練週高於 CTL，休息週快速回落；TSB 在 0 以上表示狀態良好。比賽前 7–10 天減量讓 TSB 回正，是最佳出賽時機。
+          </div>
+        </div>
       </div>
 
       <!-- Weekly Stats -->
@@ -427,6 +475,13 @@
     </div>
 
     <script>
+      function togglePmcLegend() {
+        const legend = document.getElementById('pmcLegend');
+        const label = document.getElementById('pmcLegendLabel');
+        const isHidden = legend.classList.toggle('hidden');
+        label.textContent = isHidden ? '圖說' : '收合';
+      }
+
       function openSettings() {
         document.getElementById('settingsModal').classList.remove('hidden');
         document.getElementById('saveMsg').classList.add('hidden');
