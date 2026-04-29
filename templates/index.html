@@ -295,87 +295,133 @@
       </div>
 
       <!-- Recent Activities -->
-      <h2 class="text-xl font-bold mb-4 px-2 text-slate-300">最近騎乘資料</h2>
-      <div class="space-y-3">
-        {% for act in activities %}
-        <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 hover:bg-slate-800/70 transition">
+      <div class="flex items-center justify-between mb-4 px-2 gap-3 flex-wrap">
+        <h2 class="text-xl font-bold text-slate-300">最近騎乘資料</h2>
+        <div class="flex items-center gap-2">
+          <span id="actPageInfo" class="text-xs text-slate-500"></span>
+          <select
+            id="actSortSelect"
+            onchange="actApplySort()"
+            class="bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-orange-500 transition cursor-pointer"
+          >
+            <option value="date_desc">新到舊</option>
+            <option value="date_asc">舊到新</option>
+            <option value="watts_desc">均瓦最高</option>
+            <option value="speed_desc">均速最高</option>
+            <option value="distance_desc">距離最遠</option>
+            <option value="tss_desc">TSS 最高</option>
+          </select>
+        </div>
+      </div>
 
-          <!-- Row 1: Name + Date -->
-          <div class="flex justify-between items-start mb-3">
-            <div>
-              <div class="font-bold text-base text-slate-100">{{ act.name }}</div>
-              <div class="text-xs text-slate-500 mt-0.5">{{ act.date_display }} {{ act.time_display }} · {{ act.sport_type }}</div>
+      <!-- Cards Grid -->
+      <div id="actGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for act in activities %}
+        <div class="act-card bg-slate-900/60 rounded-2xl border border-slate-800 hover:border-slate-700 hover:bg-slate-800/60 transition flex flex-col"
+          data-idx="{{ loop.index0 }}"
+          data-ts="{{ act.utc_dt.timestamp() | int }}"
+          data-watts="{{ act.avg_watts or 0 }}"
+          data-speed="{{ act.avg_speed_kmh or 0 }}"
+          data-distance="{{ act.distance_km or 0 }}"
+          data-tss="{{ act.tss or 0 }}"
+        >
+
+          <!-- Card Header -->
+          <div class="p-4 pb-3 flex justify-between items-start gap-2">
+            <div class="min-w-0">
+              <div class="font-semibold text-sm text-slate-100 leading-snug truncate">{{ act.name }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">{{ act.date_display }} {{ act.time_display }}</div>
             </div>
             {% if act.tss %}
-            <div class="text-right">
-              <div class="text-yellow-400 font-mono font-bold text-xl">{{ act.tss }}</div>
-              <div class="text-xs text-slate-500">TSS</div>
+            <div class="text-right flex-shrink-0">
+              <div class="text-yellow-400 font-mono font-bold text-lg leading-none">{{ act.tss }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">TSS</div>
             </div>
             {% elif act.suffer_score %}
-            <div class="text-right">
-              <div class="text-purple-400 font-mono font-bold text-xl">{{ act.suffer_score }}</div>
-              <div class="text-xs text-slate-500">Suffer</div>
+            <div class="text-right flex-shrink-0">
+              <div class="text-purple-400 font-mono font-bold text-lg leading-none">{{ act.suffer_score }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">Suffer</div>
             </div>
             {% endif %}
           </div>
 
-          <!-- Row 2: Metrics chips -->
-          <div class="flex flex-wrap gap-2">
-            <span class="bg-slate-800 px-3 py-1 rounded-lg text-sm">
-              <span class="text-slate-400">距離</span>
-              <span class="text-slate-100 font-mono ml-1">{{ act.distance_km }} km</span>
-            </span>
-            <span class="bg-slate-800 px-3 py-1 rounded-lg text-sm">
-              <span class="text-slate-400">時間</span>
-              <span class="text-slate-100 font-mono ml-1">{{ act.duration }}</span>
-            </span>
-            {% if act.elevation_m > 0 %}
-            <span class="bg-slate-800 px-3 py-1 rounded-lg text-sm">
-              <span class="text-slate-400">爬升</span>
-              <span class="text-slate-100 font-mono ml-1">{{ act.elevation_m }} m</span>
-            </span>
-            {% endif %}
-            {% if act.has_power %}
-            <span class="bg-orange-950/60 border border-orange-800/40 px-3 py-1 rounded-lg text-sm">
-              <span class="text-orange-400">均功</span>
-              <span class="text-orange-200 font-mono font-bold ml-1">{{ act.avg_watts }} W</span>
-            </span>
-            {% if act.weighted_watts and act.weighted_watts != act.avg_watts %}
-            <span class="bg-orange-950/60 border border-orange-800/40 px-3 py-1 rounded-lg text-sm">
-              <span class="text-orange-400">NP</span>
-              <span class="text-orange-200 font-mono font-bold ml-1">{{ act.weighted_watts }} W</span>
-            </span>
-            {% endif %}
-            {% endif %}
-            {% if act.has_hr %}
-            <span class="bg-red-950/60 border border-red-800/40 px-3 py-1 rounded-lg text-sm">
-              <span class="text-red-400">HR</span>
-              <span class="text-red-200 font-mono font-bold ml-1">{{ act.avg_hr }} bpm</span>
-            </span>
-            {% endif %}
+          <!-- Metrics Grid -->
+          <div class="grid grid-cols-2 gap-px bg-slate-800 border-t border-slate-800 flex-1">
+
+            <div class="bg-slate-900/80 px-3 py-2.5">
+              <div class="text-xs text-slate-500 mb-0.5">距離</div>
+              <div class="text-sm font-mono font-semibold text-slate-100">
+                {% if act.distance_km %}{{ act.distance_km }} <span class="text-slate-500 font-normal text-xs">km</span>{% else %}—{% endif %}
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 px-3 py-2.5">
+              <div class="text-xs text-slate-500 mb-0.5">時間</div>
+              <div class="text-sm font-mono font-semibold text-slate-100">{{ act.duration }}</div>
+            </div>
+
+            <div class="bg-slate-900/80 px-3 py-2.5">
+              <div class="text-xs text-slate-500 mb-0.5">爬升</div>
+              <div class="text-sm font-mono font-semibold text-slate-100">
+                {% if act.elevation_m > 0 %}{{ act.elevation_m }} <span class="text-slate-500 font-normal text-xs">m</span>{% else %}—{% endif %}
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 px-3 py-2.5">
+              <div class="text-xs text-slate-500 mb-0.5">均速</div>
+              <div class="text-sm font-mono font-semibold text-slate-100">
+                {% if act.avg_speed_kmh %}{{ act.avg_speed_kmh }} <span class="text-slate-500 font-normal text-xs">km/h</span>{% else %}—{% endif %}
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 px-3 py-2.5">
+              <div class="text-xs text-slate-500 mb-0.5">均瓦</div>
+              <div class="text-sm font-mono font-semibold {% if act.has_power %}text-orange-300{% else %}text-slate-600{% endif %}">
+                {% if act.has_power and act.avg_watts %}{{ act.avg_watts }} <span class="font-normal text-xs">W</span>{% else %}—{% endif %}
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 px-3 py-2.5 rounded-br-2xl">
+              <div class="text-xs text-slate-500 mb-0.5">踏頻</div>
+              <div class="text-sm font-mono font-semibold text-slate-100">
+                {% if act.avg_cadence %}{{ act.avg_cadence }} <span class="text-slate-500 font-normal text-xs">rpm</span>{% else %}—{% endif %}
+              </div>
+            </div>
+
           </div>
 
-          <!-- Row 3: Interpretation -->
+          <!-- Footer: IF / interpretation -->
           {% if act.interpretation %}
-          <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-            <span class="text-slate-400">
-              IF <span class="font-mono text-slate-300">{{ act.if_value }}</span>
-              — <span class="text-slate-200">{{ act.interpretation }}</span>
-            </span>
-            {% if act.recovery_note %}
-            <span class="text-slate-500 ml-3 flex-shrink-0">{{ act.recovery_note }}</span>
-            {% endif %}
+          <div class="px-4 py-2.5 border-t border-slate-800 text-xs text-slate-500 rounded-b-2xl">
+            IF <span class="font-mono text-slate-400">{{ act.if_value }}</span>
+            <span class="mx-1 text-slate-700">·</span>
+            <span class="text-slate-400">{{ act.interpretation }}</span>
           </div>
           {% elif act.suffer_score %}
-          <div class="mt-3 pt-3 border-t border-slate-800 text-xs text-slate-600">
+          <div class="px-4 py-2.5 border-t border-slate-800 text-xs text-slate-600 rounded-b-2xl">
             無功率計，以 Suffer Score 作為壓力指標
           </div>
           {% endif %}
 
         </div>
         {% else %}
-        <div class="text-center text-slate-500 py-10">尚無騎乘資料</div>
+        <div class="col-span-3 text-center text-slate-500 py-10">尚無騎乘資料</div>
         {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div id="actPagination" class="flex items-center justify-center gap-4 mt-6 mb-2">
+        <button
+          id="actPrevBtn"
+          onclick="actChangePage(actCurrentPage - 1)"
+          class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+        >← 上一頁</button>
+        <span id="actPageLabel" class="text-sm text-slate-400 font-mono min-w-[80px] text-center"></span>
+        <button
+          id="actNextBtn"
+          onclick="actChangePage(actCurrentPage + 1)"
+          class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+        >下一頁 →</button>
       </div>
 
     </div>
@@ -511,6 +557,50 @@
           interaction: { mode: 'nearest', axis: 'x', intersect: false }
         }
       });
+    </script>
+    <script>
+      const ACT_PAGE_SIZE = 9;
+      let actCurrentPage = 1;
+      let actSortedCards = [];
+
+      const actGrid = document.getElementById('actGrid');
+
+      function actApplySort() {
+        const sort = document.getElementById('actSortSelect').value;
+        const cards = Array.from(document.querySelectorAll('.act-card'));
+
+        const key = {
+          date_desc:     c => -parseFloat(c.dataset.ts),
+          date_asc:      c =>  parseFloat(c.dataset.ts),
+          watts_desc:    c => -parseFloat(c.dataset.watts),
+          speed_desc:    c => -parseFloat(c.dataset.speed),
+          distance_desc: c => -parseFloat(c.dataset.distance),
+          tss_desc:      c => -parseFloat(c.dataset.tss),
+        }[sort] || (c => -parseFloat(c.dataset.ts));
+
+        actSortedCards = cards.sort((a, b) => key(a) - key(b));
+        actSortedCards.forEach(c => actGrid.appendChild(c));
+        actChangePage(1);
+      }
+
+      function actChangePage(page) {
+        const total = actSortedCards.length;
+        const totalPages = Math.max(1, Math.ceil(total / ACT_PAGE_SIZE));
+        if (page < 1 || page > totalPages) return;
+        actCurrentPage = page;
+        const start = (page - 1) * ACT_PAGE_SIZE;
+        const end = start + ACT_PAGE_SIZE;
+        actSortedCards.forEach((card, i) => {
+          card.classList.toggle('hidden', i < start || i >= end);
+        });
+        document.getElementById('actPageLabel').textContent = `第 ${page} / ${totalPages} 頁`;
+        document.getElementById('actPageInfo').textContent = `共 ${total} 筆`;
+        document.getElementById('actPrevBtn').disabled = page <= 1;
+        document.getElementById('actNextBtn').disabled = page >= totalPages;
+        document.getElementById('actPagination').style.display = totalPages <= 1 ? 'none' : 'flex';
+      }
+
+      actApplySort();
     </script>
   </body>
 </html>

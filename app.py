@@ -212,6 +212,8 @@ def enrich_activity(act, ftp):
         'weighted_watts': round(act['weighted_average_watts']) if act.get('device_watts') and act.get('weighted_average_watts') else None,
         'has_hr': bool(act.get('has_heartrate')),
         'avg_hr': round(act['average_heartrate']) if act.get('has_heartrate') and act.get('average_heartrate') else None,
+        'avg_speed_kmh': round(act['average_speed'] * 3.6, 1) if act.get('average_speed') else None,
+        'avg_cadence': round(act['average_cadence']) if act.get('average_cadence') else None,
         'suffer_score': act.get('suffer_score'),
         'tss': tss,
         'if_value': if_value,
@@ -332,7 +334,12 @@ def index():
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
 
-    activities = [enrich_activity(a, ftp) for a in acts_raw]
+    BIKE_SPORT_TYPES = {
+        'Ride', 'MountainBikeRide', 'GravelRide', 'VirtualRide',
+        'EBikeRide', 'Velomobile', 'Handcycle',
+    }
+    bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
+    activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
 
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
     week_start = (now_utc - timedelta(days=now_utc.weekday())).replace(
@@ -358,7 +365,7 @@ def index():
 
     return render_template(
         'index.html',
-        activities=activities[:5],
+        activities=activities,
         athlete=athlete,
         ftp=ftp,
         weight_kg=weight_kg,
