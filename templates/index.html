@@ -16,21 +16,123 @@
           <p class="text-slate-400">防止資科被當的單車數據外掛</p>
         </div>
         <div class="flex items-center gap-3">
-          {% if athlete.profile %}
-          <img
-            src="{{ athlete.profile }}"
-            alt="{{ athlete.firstname }} {{ athlete.lastname }}"
-            class="w-10 h-10 rounded-full border-2 border-orange-500 object-cover"
-          />
-          {% endif %}
           <div class="text-right">
             <div class="text-slate-200 font-semibold leading-tight">
               {{ athlete.firstname }} {{ athlete.lastname }}
             </div>
             <span class="text-xs text-green-400">已連線 Strava</span>
           </div>
+          <button
+            id="avatarBtn"
+            onclick="openSettings()"
+            class="relative group focus:outline-none"
+            title="帳號設定"
+          >
+            {% if athlete.profile %}
+            <img
+              src="{{ athlete.profile }}"
+              alt="{{ athlete.firstname }} {{ athlete.lastname }}"
+              class="w-10 h-10 rounded-full border-2 border-orange-500 object-cover transition group-hover:border-orange-300 group-hover:scale-105"
+            />
+            {% else %}
+            <div class="w-10 h-10 rounded-full border-2 border-orange-500 bg-slate-800 flex items-center justify-center transition group-hover:border-orange-300">
+              <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+              </svg>
+            </div>
+            {% endif %}
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-slate-900 rounded-full flex items-center justify-center">
+              <svg class="w-2.5 h-2.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </span>
+          </button>
         </div>
       </header>
+
+      <!-- Settings Modal -->
+      <div id="settingsModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeSettings()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm px-4">
+          <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                {% if athlete.profile %}
+                <img src="{{ athlete.profile }}" class="w-9 h-9 rounded-full border border-orange-500/60 object-cover" />
+                {% endif %}
+                <div>
+                  <div class="text-slate-200 font-semibold text-sm">{{ athlete.firstname }} {{ athlete.lastname }}</div>
+                  <div class="text-xs text-slate-500">帳號設定</div>
+                </div>
+              </div>
+              <button onclick="closeSettings()" class="text-slate-500 hover:text-slate-300 transition p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Fields -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">FTP（瓦特）</label>
+                <div class="relative">
+                  <input
+                    id="ftpInput"
+                    type="number"
+                    min="1"
+                    max="600"
+                    value="{{ ftp }}"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-12"
+                  />
+                  <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">W</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">功能臨界功率，用於 TSS / IF 計算</p>
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">體重（公斤）</label>
+                <div class="relative">
+                  <input
+                    id="weightInput"
+                    type="number"
+                    min="1"
+                    max="200"
+                    step="0.1"
+                    value="{{ weight_kg }}"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14"
+                  />
+                  <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">kg</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">用於 W/kg 與武嶺時間預測</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-6 flex gap-3">
+              <button
+                onclick="closeSettings()"
+                class="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 text-sm hover:text-slate-200 hover:border-slate-600 transition"
+              >
+                取消
+              </button>
+              <button
+                id="saveBtn"
+                onclick="saveSettings()"
+                class="flex-2 flex-grow py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-semibold text-sm transition disabled:opacity-50"
+              >
+                儲存
+              </button>
+            </div>
+
+            <div id="saveMsg" class="hidden mt-3 text-center text-sm text-green-400">已儲存，重新整理後生效</div>
+            <div id="saveErr" class="hidden mt-3 text-center text-sm text-red-400"></div>
+          </div>
+        </div>
+      </div>
 
       <!-- Section 1: KPI Strip -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -80,24 +182,62 @@
           </div>
         </div>
 
-        <!-- Card C: Wuling Prediction -->
-        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
-          <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-3">武嶺預測時間</h3>
-          <div class="flex items-baseline gap-2 mb-1">
-            <span class="text-2xl font-black font-mono
-              {% if wuling.sub_three %}text-green-400{% else %}text-orange-400{% endif %}">
-              {{ wuling.time_display }}
-            </span>
-            {% if wuling.sub_three %}
-            <span class="text-xs text-green-500 font-semibold">破三 ✓</span>
-            {% endif %}
+        <!-- Card C: Wuling Dual Prediction -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col">
+          <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-1">西進武嶺 預測時間</h3>
+          <p class="text-xs text-slate-600 mb-3">地理中心碑→武嶺 52.6km · 2593m ↑</p>
+
+          <div class="grid grid-cols-2 divide-x divide-slate-800 flex-1">
+            <!-- 當下狀態 -->
+            <div class="pr-3">
+              <p class="text-xs text-slate-500 mb-1">當下狀態</p>
+              <span class="text-xs font-mono
+                {% if wuling.current.tsb is not none and wuling.current.tsb > 0 %}text-green-500
+                {% elif wuling.current.tsb is not none and wuling.current.tsb > -10 %}text-yellow-500
+                {% else %}text-red-400{% endif %}">
+                TSB {{ wuling.current.tsb }}
+              </span>
+              <div class="mt-1">
+                <span class="text-xl font-black font-mono
+                  {% if wuling.current.color == 'green' %}text-green-400
+                  {% elif wuling.current.color == 'yellow' %}text-yellow-400
+                  {% else %}text-red-400{% endif %}">
+                  {{ wuling.current.time_display }}
+                </span>
+                {% if wuling.current.sub_three %}
+                <span class="text-xs text-green-500 ml-1">破三</span>
+                {% endif %}
+              </div>
+              {% if wuling.current.speed_kmh %}
+              <p class="text-xs text-slate-500 mt-1">{{ wuling.current.speed_kmh }} km/h</p>
+              {% endif %}
+            </div>
+
+            <!-- 理想狀態 -->
+            <div class="pl-3">
+              <p class="text-xs text-slate-500 mb-1">休息 7 天後</p>
+              <span class="text-xs font-mono text-green-500">TSB +15</span>
+              <div class="mt-1">
+                <span class="text-xl font-black font-mono
+                  {% if wuling.ideal.color == 'green' %}text-green-400
+                  {% elif wuling.ideal.color == 'yellow' %}text-yellow-400
+                  {% else %}text-red-400{% endif %}">
+                  {{ wuling.ideal.time_display }}
+                </span>
+                {% if wuling.ideal.sub_three %}
+                <span class="text-xs text-green-500 ml-1">破三</span>
+                {% endif %}
+              </div>
+              {% if wuling.ideal.speed_kmh %}
+              <p class="text-xs text-slate-500 mt-1">{{ wuling.ideal.speed_kmh }} km/h</p>
+              {% endif %}
+            </div>
           </div>
-          {% if wuling.speed_kmh %}
-          <p class="text-xs text-slate-500 mb-1">均速 {{ wuling.speed_kmh }} km/h</p>
-          {% endif %}
-          <p class="text-xs text-slate-600">埔里→武嶺 102km · 2835m ↑</p>
-          {% if weight_was_estimated %}
-          <p class="text-xs text-slate-600 italic mt-1">體重未設定，以 70 kg 估算</p>
+
+          {% if wuling.delta_mins > 0 %}
+          <p class="text-xs text-cyan-500 mt-3 pt-3 border-t border-slate-800">
+            充分休息可省下 {{ wuling.delta_mins }} 分鐘
+          </p>
           {% endif %}
         </div>
 
@@ -239,6 +379,66 @@
       </div>
 
     </div>
+
+    <script>
+      function openSettings() {
+        document.getElementById('settingsModal').classList.remove('hidden');
+        document.getElementById('saveMsg').classList.add('hidden');
+        document.getElementById('saveErr').classList.add('hidden');
+      }
+
+      function closeSettings() {
+        document.getElementById('settingsModal').classList.add('hidden');
+      }
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSettings();
+      });
+
+      async function saveSettings() {
+        const btn = document.getElementById('saveBtn');
+        const msg = document.getElementById('saveMsg');
+        const err = document.getElementById('saveErr');
+        msg.classList.add('hidden');
+        err.classList.add('hidden');
+
+        const ftp = parseInt(document.getElementById('ftpInput').value);
+        const weight = parseFloat(document.getElementById('weightInput').value);
+
+        if (!ftp || ftp <= 0 || ftp > 600) {
+          err.textContent = 'FTP 請輸入 1–600 之間的數值';
+          err.classList.remove('hidden');
+          return;
+        }
+        if (!weight || weight <= 0 || weight > 200) {
+          err.textContent = '體重請輸入 1–200 之間的數值';
+          err.classList.remove('hidden');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '儲存中…';
+        try {
+          const res = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ftp_watts: ftp, weight_kg: weight})
+          });
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || '儲存失敗');
+          }
+          msg.classList.remove('hidden');
+          setTimeout(() => location.reload(), 900);
+        } catch (e) {
+          err.textContent = e.message;
+          err.classList.remove('hidden');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '儲存';
+        }
+      }
+    </script>
 
     <script>
       const pmcData = {{ chart_data | tojson }};

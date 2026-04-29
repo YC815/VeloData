@@ -1,2 +1,8 @@
 .DS_Store
 .env
+velodata.db
+velodata.db-shm
+velodata.db-wal
+__pycache__/
+*.pyc
+.venv/
