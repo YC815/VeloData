@@ -18,12 +18,13 @@ source .venv/bin/activate && pip install -r requirements.txt
 
 ## 環境設定
 
-複製 `.env.example` 為 `.env`，填入三個必要變數：
+複製 `.env.example` 為 `.env`，填入必要變數：
 
 ```
 STRAVA_CLIENT_ID=
 STRAVA_CLIENT_SECRET=
 STRAVA_REFRESH_TOKEN=
+FTP_WATTS=250        # 運動員 FTP，用於 TSS 計算，預設 250
 ```
 
 Strava OAuth 使用 `refresh_token` grant type，每次請求前都需呼叫 `/oauth/token` 換取短效 `access_token`。
@@ -31,9 +32,10 @@ Strava OAuth 使用 `refresh_token` grant type，每次請求前都需呼叫 `/o
 ## 架構
 
 - **`app.py`** — Flask 入口，包含 Strava token 刷新邏輯與路由。目前 `/` 路由每次都即時刷新 token 再打 API，適合原型但不適合高頻訪問。
-- **`templates/index.html`** — Jinja2 模板，使用 Tailwind CSS CDN。顯示最近 5 筆騎乘的 `average_watts`。
+- **`templates/index.html`** — Jinja2 模板，使用 Tailwind CSS CDN。顯示本週統計（TSS、距離、時間）與最近 5 筆騎乘完整資料。
 - **`docs/introdoce.md`** — Strava API 核心參數規格（欄位、單位、型別）。
 - **`docs/strava_swagger_api.json`** — Strava API v3 完整 OpenAPI 規格。
+- **`docs/strava_api_gotchas.md`** — 串接 Strava API 的踩坑紀錄。**寫新功能前必讀**，記錄了 `average_watts` 條件、`start_date_local` 的假 Z 後綴、TSS 公式、OAuth scope、Rate Limit 策略等真實踩坑。
 
 ## Strava API 關鍵規則
 

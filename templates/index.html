@@ -7,11 +7,11 @@
   </head>
   <body class="bg-slate-950 text-slate-100 font-sans">
     <div class="max-w-4xl mx-auto py-10 px-6">
+
+      <!-- Header -->
       <header class="mb-10 flex justify-between items-end">
         <div>
-          <h1 class="text-4xl font-black text-orange-500 tracking-tighter">
-            VeloData
-          </h1>
+          <h1 class="text-4xl font-black text-orange-500 tracking-tighter">VeloData</h1>
           <p class="text-slate-400">防止資科被當的單車數據外掛</p>
         </div>
         <div class="flex items-center gap-3">
@@ -31,40 +31,104 @@
         </div>
       </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <div
-          class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl"
-        >
-          <h3 class="text-slate-400 text-sm mb-2">當前狀態</h3>
-          <p class="text-3xl font-bold text-green-400">體能恢復中</p>
+      <!-- Weekly Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-2">本週 TSS</h3>
+          {% if weekly_tss > 0 %}
+          <p class="text-3xl font-bold text-blue-400">{{ weekly_tss }}</p>
+          <p class="text-xs text-slate-500 mt-1">FTP {{ ftp }} W 計算</p>
+          {% else %}
+          <p class="text-3xl font-bold text-slate-600">—</p>
+          <p class="text-xs text-slate-500 mt-1">需功率計資料</p>
+          {% endif %}
         </div>
-        <div
-          class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl"
-        >
-          <h3 class="text-slate-400 text-sm mb-2">本週 TSS 累積</h3>
-          <p class="text-3xl font-bold text-blue-400">245 / 500</p>
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-2">本週距離</h3>
+          <p class="text-3xl font-bold text-green-400">{{ weekly_km }} <span class="text-lg font-normal text-slate-400">km</span></p>
+        </div>
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-2">本週騎乘時間</h3>
+          <p class="text-3xl font-bold text-orange-400">{{ weekly_time }}</p>
         </div>
       </div>
 
+      <!-- Recent Activities -->
       <h2 class="text-xl font-bold mb-4 px-2 text-slate-300">最近騎乘資料</h2>
-      <div class="space-y-4">
+      <div class="space-y-3">
         {% for act in activities %}
-        <div
-          class="bg-slate-900/50 p-4 rounded-xl border border-slate-800 flex justify-between items-center hover:bg-slate-800 transition"
-        >
-          <div>
-            <div class="font-bold text-lg text-slate-200">{{ act.name }}</div>
-            <div class="text-xs text-slate-500">{{ act.start_date_local }}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-orange-400 font-mono font-bold text-xl">
-              {{ act.average_watts }} W
+        <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 hover:bg-slate-800/70 transition">
+
+          <!-- Row 1: Name + Date -->
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <div class="font-bold text-base text-slate-100">{{ act.name }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">{{ act.date_display }} {{ act.time_display }} · {{ act.sport_type }}</div>
             </div>
-            <div class="text-xs text-slate-500">平均功率</div>
+            {% if act.tss %}
+            <div class="text-right">
+              <div class="text-yellow-400 font-mono font-bold text-xl">{{ act.tss }}</div>
+              <div class="text-xs text-slate-500">TSS</div>
+            </div>
+            {% elif act.suffer_score %}
+            <div class="text-right">
+              <div class="text-purple-400 font-mono font-bold text-xl">{{ act.suffer_score }}</div>
+              <div class="text-xs text-slate-500">Suffer</div>
+            </div>
+            {% endif %}
           </div>
+
+          <!-- Row 2: Metrics chips -->
+          <div class="flex flex-wrap gap-2">
+            <!-- Distance -->
+            <span class="bg-slate-800 px-3 py-1 rounded-lg text-sm">
+              <span class="text-slate-400">距離</span>
+              <span class="text-slate-100 font-mono ml-1">{{ act.distance_km }} km</span>
+            </span>
+
+            <!-- Duration -->
+            <span class="bg-slate-800 px-3 py-1 rounded-lg text-sm">
+              <span class="text-slate-400">時間</span>
+              <span class="text-slate-100 font-mono ml-1">{{ act.duration }}</span>
+            </span>
+
+            <!-- Elevation -->
+            {% if act.elevation_m > 0 %}
+            <span class="bg-slate-800 px-3 py-1 rounded-lg text-sm">
+              <span class="text-slate-400">爬升</span>
+              <span class="text-slate-100 font-mono ml-1">{{ act.elevation_m }} m</span>
+            </span>
+            {% endif %}
+
+            <!-- Power (only when device_watts is True) -->
+            {% if act.has_power %}
+            <span class="bg-orange-950/60 border border-orange-800/40 px-3 py-1 rounded-lg text-sm">
+              <span class="text-orange-400">均功</span>
+              <span class="text-orange-200 font-mono font-bold ml-1">{{ act.avg_watts }} W</span>
+            </span>
+            {% if act.weighted_watts and act.weighted_watts != act.avg_watts %}
+            <span class="bg-orange-950/60 border border-orange-800/40 px-3 py-1 rounded-lg text-sm">
+              <span class="text-orange-400">NP</span>
+              <span class="text-orange-200 font-mono font-bold ml-1">{{ act.weighted_watts }} W</span>
+            </span>
+            {% endif %}
+            {% endif %}
+
+            <!-- Heart Rate -->
+            {% if act.has_hr %}
+            <span class="bg-red-950/60 border border-red-800/40 px-3 py-1 rounded-lg text-sm">
+              <span class="text-red-400">HR</span>
+              <span class="text-red-200 font-mono font-bold ml-1">{{ act.avg_hr }} bpm</span>
+            </span>
+            {% endif %}
+          </div>
+
         </div>
+        {% else %}
+        <div class="text-center text-slate-500 py-10">尚無騎乘資料</div>
         {% endfor %}
       </div>
+
     </div>
   </body>
 </html>
