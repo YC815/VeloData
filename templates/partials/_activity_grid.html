@@ -1,0 +1,114 @@
+<div class="flex items-center justify-between mb-4 px-2 gap-3 flex-wrap">
+  <h2 class="text-xl font-bold text-slate-300">最近騎乘資料</h2>
+  <div class="flex items-center gap-2">
+    <span id="actPageInfo" class="text-xs text-slate-500"></span>
+    <select
+      id="actSortSelect"
+      onchange="actApplySort()"
+      class="bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-orange-500 transition cursor-pointer"
+    >
+      <option value="date_desc">新到舊</option>
+      <option value="date_asc">舊到新</option>
+      <option value="watts_desc">均瓦最高</option>
+      <option value="speed_desc">均速最高</option>
+      <option value="distance_desc">距離最遠</option>
+      <option value="tss_desc">TSS 最高</option>
+    </select>
+  </div>
+</div>
+
+<div id="actGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for act in activities %}
+  <div class="act-card bg-slate-900/60 rounded-2xl border border-slate-800 hover:border-slate-700 hover:bg-slate-800/60 transition flex flex-col"
+    data-idx="{{ loop.index0 }}"
+    data-ts="{{ act.utc_dt.timestamp() | int }}"
+    data-watts="{{ act.avg_watts or 0 }}"
+    data-speed="{{ act.avg_speed_kmh or 0 }}"
+    data-distance="{{ act.distance_km or 0 }}"
+    data-tss="{{ act.tss or 0 }}"
+  >
+    <div class="p-4 pb-3 flex justify-between items-start gap-2">
+      <div class="min-w-0">
+        <div class="font-semibold text-sm text-slate-100 leading-snug truncate">{{ act.name }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">{{ act.date_display }} {{ act.time_display }}</div>
+      </div>
+      {% if act.tss %}
+      <div class="text-right flex-shrink-0">
+        <div class="text-yellow-400 font-mono font-bold text-lg leading-none">{{ act.tss }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">TSS</div>
+      </div>
+      {% elif act.suffer_score %}
+      <div class="text-right flex-shrink-0">
+        <div class="text-purple-400 font-mono font-bold text-lg leading-none">{{ act.suffer_score }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">Suffer</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="grid grid-cols-2 gap-px bg-slate-800 border-t border-slate-800 flex-1">
+      <div class="bg-slate-900/80 px-3 py-2.5">
+        <div class="text-xs text-slate-500 mb-0.5">距離</div>
+        <div class="text-sm font-mono font-semibold text-slate-100">
+          {% if act.distance_km %}{{ act.distance_km }} <span class="text-slate-500 font-normal text-xs">km</span>{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="bg-slate-900/80 px-3 py-2.5">
+        <div class="text-xs text-slate-500 mb-0.5">時間</div>
+        <div class="text-sm font-mono font-semibold text-slate-100">{{ act.duration }}</div>
+      </div>
+      <div class="bg-slate-900/80 px-3 py-2.5">
+        <div class="text-xs text-slate-500 mb-0.5">爬升</div>
+        <div class="text-sm font-mono font-semibold text-slate-100">
+          {% if act.elevation_m > 0 %}{{ act.elevation_m }} <span class="text-slate-500 font-normal text-xs">m</span>{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="bg-slate-900/80 px-3 py-2.5">
+        <div class="text-xs text-slate-500 mb-0.5">均速</div>
+        <div class="text-sm font-mono font-semibold text-slate-100">
+          {% if act.avg_speed_kmh %}{{ act.avg_speed_kmh }} <span class="text-slate-500 font-normal text-xs">km/h</span>{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="bg-slate-900/80 px-3 py-2.5">
+        <div class="text-xs text-slate-500 mb-0.5">均瓦</div>
+        <div class="text-sm font-mono font-semibold {% if act.has_power %}text-orange-300{% else %}text-slate-600{% endif %}">
+          {% if act.has_power and act.avg_watts %}{{ act.avg_watts }} <span class="font-normal text-xs">W</span>{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="bg-slate-900/80 px-3 py-2.5 rounded-br-2xl">
+        <div class="text-xs text-slate-500 mb-0.5">踏頻</div>
+        <div class="text-sm font-mono font-semibold text-slate-100">
+          {% if act.avg_cadence %}{{ act.avg_cadence }} <span class="text-slate-500 font-normal text-xs">rpm</span>{% else %}—{% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if act.interpretation %}
+    <div class="px-4 py-2.5 border-t border-slate-800 text-xs text-slate-500 rounded-b-2xl">
+      IF <span class="font-mono text-slate-400">{{ act.if_value }}</span>
+      <span class="mx-1 text-slate-700">·</span>
+      <span class="text-slate-400">{{ act.interpretation }}</span>
+    </div>
+    {% elif act.suffer_score %}
+    <div class="px-4 py-2.5 border-t border-slate-800 text-xs text-slate-600 rounded-b-2xl">
+      無功率計，以 Suffer Score 作為壓力指標
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="col-span-3 text-center text-slate-500 py-10">尚無騎乘資料</div>
+  {% endfor %}
+</div>
+
+<div id="actPagination" class="flex items-center justify-center gap-4 mt-6 mb-2">
+  <button
+    id="actPrevBtn"
+    onclick="actChangePage(actCurrentPage - 1)"
+    class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+  >← 上一頁</button>
+  <span id="actPageLabel" class="text-sm text-slate-400 font-mono min-w-[80px] text-center"></span>
+  <button
+    id="actNextBtn"
+    onclick="actChangePage(actCurrentPage + 1)"
+    class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+  >下一頁 →</button>
+</div>
