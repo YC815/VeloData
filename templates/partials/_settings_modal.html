@@ -52,6 +52,27 @@
           </div>
           <p class="text-xs text-slate-600 mt-1">用於 W/kg 與武嶺時間預測</p>
         </div>
+        <div>
+          <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">時區</label>
+          <select
+            id="timezoneSelect"
+            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-orange-500 transition"
+          >
+            {% if used_timezones %}
+            <optgroup label="曾使用的時區">
+              {% for tz in used_timezones %}
+              <option value="{{ tz }}" {% if tz == timezone %}selected{% endif %}>{{ tz }}</option>
+              {% endfor %}
+            </optgroup>
+            {% endif %}
+            <optgroup label="所有時區">
+              {% for tz in all_timezones %}
+              <option value="{{ tz }}" {% if tz == timezone and tz not in used_timezones %}selected{% endif %}>{{ tz }}</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+          <p class="text-xs text-slate-600 mt-1">影響本週統計與 PMC 圖表的日期邊界</p>
+        </div>
       </div>
 
       <div class="mt-6 flex gap-3">

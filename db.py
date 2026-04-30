@@ -12,9 +12,10 @@ class UserProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ftp_watts = db.Column(db.Integer, nullable=False, default=DEFAULT_FTP)
     weight_kg = db.Column(db.Float, nullable=False, default=DEFAULT_WEIGHT)
+    timezone = db.Column(db.String(64), nullable=False, default='Asia/Taipei')
 
     def to_dict(self):
-        return {'ftp_watts': self.ftp_watts, 'weight_kg': self.weight_kg}
+        return {'ftp_watts': self.ftp_watts, 'weight_kg': self.weight_kg, 'timezone': self.timezone}
 
 
 def get_profile(app) -> UserProfile:

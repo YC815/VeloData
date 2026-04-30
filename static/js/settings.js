@@ -28,6 +28,7 @@ async function saveSettings() {
 
   const ftp = parseInt(document.getElementById('ftpInput').value);
   const weight = parseFloat(document.getElementById('weightInput').value);
+  const timezone = document.getElementById('timezoneSelect').value;
 
   if (!ftp || ftp <= 0 || ftp > 600) {
     err.textContent = 'FTP 請輸入 1–600 之間的數值';
@@ -46,7 +47,7 @@ async function saveSettings() {
     const res = await fetch('/api/profile', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ftp_watts: ftp, weight_kg: weight }),
+      body: JSON.stringify({ ftp_watts: ftp, weight_kg: weight, timezone }),
     });
     if (!res.ok) {
       const data = await res.json();

@@ -1,8 +1,10 @@
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template, redirect, request, url_for, jsonify
 from dotenv import load_dotenv, set_key, find_dotenv
 import requests
+import pytz
 
 from db import db, UserProfile, init_db
 from wuling_engine import WulingPredictor, ROUTE_DISTANCE_KM
@@ -46,6 +48,14 @@ def refresh_strava_token():
     return data['access_token']
 
 
+def get_local_now(tz_str):
+    try:
+        tz = pytz.timezone(tz_str)
+    except pytz.UnknownTimeZoneError:
+        tz = pytz.timezone('Asia/Taipei')
+    return datetime.now(tz)
+
+
 def calc_tss(moving_time_sec, weighted_watts, ftp):
     if not weighted_watts or ftp <= 0:
         return None
@@ -72,7 +82,7 @@ def fetch_activities_90d(header):
     return resp.json()
 
 
-def calc_pmc(activities_raw, ftp):
+def calc_pmc(activities_raw, ftp, tz_str='Asia/Taipei'):
     tss_by_date = {}
     has_suffer_fallback = False
 
@@ -88,7 +98,7 @@ def calc_pmc(activities_raw, ftp):
             tss_by_date[act_date] = tss_by_date.get(act_date, 0.0) + act['suffer_score']
             has_suffer_fallback = True
 
-    today = datetime.now(timezone.utc).date()
+    today = get_local_now(tz_str).date()
     start = today - timedelta(days=89)
 
     ctl, atl = 0.0, 0.0
@@ -300,6 +310,14 @@ def api_profile_put():
         except (ValueError, TypeError):
             return jsonify({'error': '體重格式錯誤'}), 400
 
+    tz_str = data.get('timezone')
+    if tz_str is not None:
+        try:
+            pytz.timezone(tz_str)
+            profile.timezone = tz_str
+        except pytz.UnknownTimeZoneError:
+            return jsonify({'error': f'不支援的時區：{tz_str}'}), 400
+
     db.session.commit()
     return jsonify(profile.to_dict())
 
@@ -341,17 +359,25 @@ def index():
     bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
     activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
 
-    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
-    week_start = (now_utc - timedelta(days=now_utc.weekday())).replace(
+    tz = pytz.timezone(profile.timezone)
+    now_local = datetime.now(tz)
+    week_start_local = (now_local - timedelta(days=now_local.weekday())).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
-    this_week = [a for a in activities if a['utc_dt'] >= week_start]
+    week_start_utc = week_start_local.astimezone(timezone.utc).replace(tzinfo=None)
+    this_week = [a for a in activities if a['utc_dt'] >= week_start_utc]
 
     weekly_tss = round(sum(a['tss'] for a in this_week if a['tss'] is not None), 1)
     weekly_km = round(sum(a['distance_km'] for a in this_week), 1)
     weekly_time = format_duration(sum(a['moving_time_sec'] for a in this_week))
 
-    pmc = calc_pmc(acts_raw, ftp)
+    used_tz_raw = [act.get('timezone', '') for act in acts_raw if act.get('timezone')]
+    used_timezones = list(dict.fromkeys(
+        m.group(1) for raw in used_tz_raw
+        if (m := re.search(r'\)\s*(.+)$', raw))
+    ))
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     chart_data = {
         'labels': pmc['labels'][-42:],
         'ctl': pmc['ctl'][-42:],
@@ -377,6 +403,9 @@ def index():
         tsb_status=tsb_status,
         ftp_progress=ftp_progress,
         wuling=wuling,
+        timezone=profile.timezone,
+        used_timezones=used_timezones,
+        all_timezones=pytz.all_timezones,
     )
 
 
