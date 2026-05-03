@@ -1,11 +1,15 @@
-const ACT_PAGE_SIZE = 9;
-let actCurrentPage = 1;
-let actSortedCards = [];
+var ACT_PAGE_SIZE = 9;
+var actCurrentPage = 1;
+var actSortedCards = [];
 
-const actGrid = document.getElementById('actGrid');
+var actGrid = document.getElementById('actGrid');
+
+var ACT_SORT_KEY = 'velodata_act_sort';
 
 function actApplySort() {
-  const sort = document.getElementById('actSortSelect').value;
+  const select = document.getElementById('actSortSelect');
+  const sort = select.value;
+  localStorage.setItem(ACT_SORT_KEY, sort);
   const cards = Array.from(document.querySelectorAll('.act-card'));
 
   const key = {
@@ -39,4 +43,9 @@ function actChangePage(page) {
   document.getElementById('actPagination').style.display = totalPages <= 1 ? 'none' : 'flex';
 }
 
+var savedSort = localStorage.getItem(ACT_SORT_KEY);
+if (savedSort) {
+  const select = document.getElementById('actSortSelect');
+  if (select) select.value = savedSort;
+}
 actApplySort();
