@@ -1,0 +1,25 @@
+{
+  "id": "wuling_east",
+  "name": "東進武嶺（Taiwan KOM）",
+  "description": "花蓮七星潭→太魯閣→武嶺",
+  "distance_km": 105.0,
+  "elevation_m": 3275,
+  "physics": {
+    "Crr": 0.004,
+    "CdA": 0.35,
+    "rho": 1.10,
+    "loss": 0.03
+  },
+  "sub_x_targets": [
+    {"label": "破 7 小時", "minutes": 420},
+    {"label": "破 5 小時", "minutes": 300},
+    {"label": "破 4 小時", "minutes": 240}
+  ],
+  "segments": [
+    {"name": "七星潭-太魯閣（平路起點）",   "dist":  9.0, "grade": 0.005, "alt_decay": 1.00},
+    {"name": "太魯閣-天祥（峽谷緩坡）",     "dist": 19.0, "grade": 0.025, "alt_decay": 1.00},
+    {"name": "天祥-碧綠神木（中海拔爬升）", "dist": 42.0, "grade": 0.038, "alt_decay": 0.94},
+    {"name": "碧綠神木-大禹嶺（高海拔耐力）","dist": 25.0, "grade": 0.022, "alt_decay": 0.88},
+    {"name": "大禹嶺-武嶺（魔王牆）",       "dist": 10.0, "grade": 0.105, "alt_decay": 0.77}
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "yangjin_3p",
+  "name": "陽金 3P",
+  "description": "士林→小油坑→金山→風櫃嘴→至善路→冷水坑",
+  "distance_km": 75.0,
+  "elevation_m": 2100,
+  "physics": {
+    "Crr": 0.004,
+    "CdA": 0.35,
+    "rho": 1.18,
+    "loss": 0.03
+  },
+  "sub_x_targets": [
+    {"label": "破 4 小時", "minutes": 240},
+    {"label": "破 3.5 小時", "minutes": 210},
+    {"label": "破 3 小時", "minutes": 180}
+  ],
+  "segments": [
+    {"name": "第一P：小油坑（仰德大道）", "dist": 15.0, "grade": 0.053, "alt_decay": 0.98},
+    {"name": "下滑金山",                  "dist": 20.0, "grade": -0.040, "alt_decay": 1.00},
+    {"name": "第二P：風櫃嘴（員潭/大坪）","dist": 18.0, "grade": 0.033, "alt_decay": 0.99},
+    {"name": "下滑至善路",                "dist":  8.3, "grade": -0.070, "alt_decay": 1.00},
+    {"name": "第三P：冷水坑（平菁街）",   "dist": 13.7, "grade": 0.055, "alt_decay": 0.98}
+  ]
+}

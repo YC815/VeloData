@@ -1,0 +1,23 @@
+{
+  "id": "beiyi_highway",
+  "name": "北宜公路（新店段）",
+  "description": "新店國小→石牌縣界（石獅子）",
+  "distance_km": 21.5,
+  "elevation_m": 545,
+  "physics": {
+    "Crr": 0.004,
+    "CdA": 0.35,
+    "rho": 1.18,
+    "loss": 0.03
+  },
+  "sub_x_targets": [
+    {"label": "破 60 分", "minutes": 60},
+    {"label": "破 50 分", "minutes": 50},
+    {"label": "破 45 分", "minutes": 45}
+  ],
+  "segments": [
+    {"name": "新店-青潭（平路暖身）",       "dist":  3.5, "grade": 0.010, "alt_decay": 1.00},
+    {"name": "青潭-雲海國小（緩爬升）",     "dist":  9.0, "grade": 0.035, "alt_decay": 1.00},
+    {"name": "雲海國小-石牌縣界（主爬升）", "dist":  9.0, "grade": 0.045, "alt_decay": 0.99}
+  ]
+}

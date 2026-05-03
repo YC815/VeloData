@@ -1,0 +1,27 @@
+{
+  "id": "palm_of_buddha",
+  "name": "如來神掌",
+  "description": "故宮→萬里→金山→石門→三芝→淡水→巴拉卡",
+  "distance_km": 136.0,
+  "elevation_m": 3100,
+  "physics": {
+    "Crr": 0.004,
+    "CdA": 0.35,
+    "rho": 1.21,
+    "loss": 0.03
+  },
+  "sub_x_targets": [
+    {"label": "破 8 小時", "minutes": 480},
+    {"label": "破 7 小時", "minutes": 420},
+    {"label": "破 6 小時", "minutes": 360}
+  ],
+  "segments": [
+    {"name": "出發與連接段（平溪/萬里）",       "dist": 30.0, "grade": 0.015, "alt_decay": 1.00},
+    {"name": "第一指：大拇指（萬里大坪）",       "dist":  8.5, "grade": 0.062, "alt_decay": 0.99},
+    {"name": "第二指：食指（金山兩湖）",         "dist":  6.2, "grade": 0.071, "alt_decay": 1.00},
+    {"name": "第三指：中指（石門尖山湖）",       "dist":  5.5, "grade": 0.082, "alt_decay": 1.00},
+    {"name": "第四指：無名指（三芝圓山）",       "dist":  6.8, "grade": 0.058, "alt_decay": 1.00},
+    {"name": "第五指：小拇指（淡水楓樹湖/巴拉卡）", "dist": 10.5, "grade": 0.065, "alt_decay": 0.98},
+    {"name": "剩餘連接與回程段",                "dist": 68.5, "grade": 0.005, "alt_decay": 1.00}
+  ]
+}

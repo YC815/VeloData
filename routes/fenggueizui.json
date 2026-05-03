@@ -1,0 +1,23 @@
+{
+  "id": "fenggueizui",
+  "name": "風櫃嘴（楓林橋線）",
+  "description": "楓林橋→風櫃嘴頂",
+  "distance_km": 6.4,
+  "elevation_m": 411,
+  "physics": {
+    "Crr": 0.004,
+    "CdA": 0.35,
+    "rho": 1.21,
+    "loss": 0.03
+  },
+  "sub_x_targets": [
+    {"label": "破 25 分", "minutes": 25},
+    {"label": "破 30 分", "minutes": 30},
+    {"label": "破 35 分", "minutes": 35}
+  ],
+  "segments": [
+    {"name": "楓林橋起步（前段緩坡）",   "dist": 1.8, "grade": 0.055, "alt_decay": 1.00},
+    {"name": "連續髮夾彎（中段陡坡）",   "dist": 2.4, "grade": 0.090, "alt_decay": 0.99},
+    {"name": "終點前衝刺（後段稍緩）",   "dist": 2.2, "grade": 0.045, "alt_decay": 0.99}
+  ]
+}
