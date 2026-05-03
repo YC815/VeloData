@@ -424,6 +424,135 @@ def index():
     )
 
 
+@app.route('/partials/dashboard')
+def partial_dashboard():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    ftp = profile.ftp_watts
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
+        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
+        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        return redirect(url_for('auth'))
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    stats = _calc_weekly_stats(acts_raw, ftp, profile)
+    used_timezones = _extract_used_timezones(acts_raw)
+
+    return render_template(
+        'partials/_content_dashboard.html',
+        athlete=athlete,
+        ftp=ftp,
+        weight_kg=profile.weight_kg,
+        pmc=pmc,
+        tsb_status=tsb_status,
+        weekly_tss=stats['weekly_tss'],
+        weekly_km=stats['weekly_km'],
+        weekly_time=stats['weekly_time'],
+        timezone=profile.timezone,
+        used_timezones=used_timezones,
+        all_timezones=pytz.all_timezones,
+        target_race=None,
+    )
+
+
+@app.route('/partials/analysis')
+def partial_analysis():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
+        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
+        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        return redirect(url_for('auth'))
+
+    bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
+    activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    chart_data = {
+        'labels': pmc['labels'][-42:],
+        'ctl': pmc['ctl'][-42:],
+        'atl': pmc['atl'][-42:],
+        'tsb': pmc['tsb'][-42:],
+    }
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    used_timezones = _extract_used_timezones(acts_raw)
+
+    return render_template(
+        'partials/_content_analysis.html',
+        athlete=athlete,
+        ftp=ftp,
+        weight_kg=weight_kg,
+        activities=activities,
+        pmc=pmc,
+        chart_data=chart_data,
+        tsb_status=tsb_status,
+        timezone=profile.timezone,
+        used_timezones=used_timezones,
+        all_timezones=pytz.all_timezones,
+    )
+
+
+@app.route('/partials/racing')
+def partial_racing():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
+        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
+        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        return redirect(url_for('auth'))
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    ftp_progress = calc_ftp_progress(ftp, weight_kg)
+    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
+    used_timezones = _extract_used_timezones(acts_raw)
+
+    return render_template(
+        'partials/_content_racing.html',
+        athlete=athlete,
+        ftp=ftp,
+        weight_kg=weight_kg,
+        pmc=pmc,
+        tsb_status=tsb_status,
+        ftp_progress=ftp_progress,
+        wuling=wuling,
+        timezone=profile.timezone,
+        used_timezones=used_timezones,
+        all_timezones=pytz.all_timezones,
+    )
+
+
+@app.route('/partials/profile')
+def partial_profile():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    return render_template(
+        'partials/_content_profile.html',
+        athlete=athlete,
+        ftp=profile.ftp_watts,
+        weight_kg=profile.weight_kg,
+        timezone=profile.timezone,
+        used_timezones=[],
+        all_timezones=pytz.all_timezones,
+    )
+
+
 @app.route('/api/export-for-ai')
 def api_export_for_ai():
     import json as _json

@@ -1,11 +1,4 @@
 {% extends 'base.html' %}
 {% block content %}
-  {% include 'partials/_race_list.html' %}
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    {% include 'partials/_kpi_wuling.html' %}
-    {% include 'partials/_kpi_ftp_progress.html' %}
-  </div>
-{% endblock %}
-{% block scripts %}
-  <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+  {% include 'partials/_content_racing.html' %}
 {% endblock %}
