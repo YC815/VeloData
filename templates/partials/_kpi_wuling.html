@@ -1,0 +1,55 @@
+<div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col">
+  <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-1">西進武嶺 預測時間</h3>
+  <p class="text-xs text-slate-600 mb-3">地理中心碑→武嶺 52.6km · 2593m ↑</p>
+
+  <div class="grid grid-cols-2 divide-x divide-slate-800 flex-1">
+    <div class="pr-3">
+      <p class="text-xs text-slate-500 mb-1">當下狀態</p>
+      <span class="text-xs font-mono
+        {% if wuling.current.tsb is not none and wuling.current.tsb > 0 %}text-green-500
+        {% elif wuling.current.tsb is not none and wuling.current.tsb > -10 %}text-yellow-500
+        {% else %}text-red-400{% endif %}">
+        TSB {{ wuling.current.tsb }}
+      </span>
+      <div class="mt-1">
+        <span class="text-xl font-black font-mono
+          {% if wuling.current.color == 'green' %}text-green-400
+          {% elif wuling.current.color == 'yellow' %}text-yellow-400
+          {% else %}text-red-400{% endif %}">
+          {{ wuling.current.time_display }}
+        </span>
+        {% if wuling.current.sub_three %}
+        <span class="text-xs text-green-500 ml-1">破三</span>
+        {% endif %}
+      </div>
+      {% if wuling.current.speed_kmh %}
+      <p class="text-xs text-slate-500 mt-1">{{ wuling.current.speed_kmh }} km/h</p>
+      {% endif %}
+    </div>
+
+    <div class="pl-3">
+      <p class="text-xs text-slate-500 mb-1">休息 7 天後</p>
+      <span class="text-xs font-mono text-green-500">TSB +15</span>
+      <div class="mt-1">
+        <span class="text-xl font-black font-mono
+          {% if wuling.ideal.color == 'green' %}text-green-400
+          {% elif wuling.ideal.color == 'yellow' %}text-yellow-400
+          {% else %}text-red-400{% endif %}">
+          {{ wuling.ideal.time_display }}
+        </span>
+        {% if wuling.ideal.sub_three %}
+        <span class="text-xs text-green-500 ml-1">破三</span>
+        {% endif %}
+      </div>
+      {% if wuling.ideal.speed_kmh %}
+      <p class="text-xs text-slate-500 mt-1">{{ wuling.ideal.speed_kmh }} km/h</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if wuling.delta_mins > 0 %}
+  <p class="text-xs text-cyan-500 mt-3 pt-3 border-t border-slate-800">
+    充分休息可省下 {{ wuling.delta_mins }} 分鐘
+  </p>
+  {% endif %}
+</div>

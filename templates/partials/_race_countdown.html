@@ -1,0 +1,11 @@
+{% if target_race %}
+  {# Future: render race countdown card #}
+{% else %}
+<div class="bg-slate-900/40 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-2 min-h-[152px]">
+  <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
+  </svg>
+  <p class="text-slate-500 text-sm">尚未設定目標賽事</p>
+  <a href="{{ url_for('racing') }}" class="text-orange-400 hover:text-orange-300 text-xs transition">前往賽事規劃設定 →</a>
+</div>
+{% endif %}

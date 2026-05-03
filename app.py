@@ -19,6 +19,11 @@ STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize"
 STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token"
 REDIRECT_URI = "http://localhost:8000/callback"
 
+BIKE_SPORT_TYPES = {
+    'Ride', 'MountainBikeRide', 'GravelRide', 'VirtualRide',
+    'EBikeRide', 'Velomobile', 'Handcycle',
+}
+
 
 def get_user_profile():
     profile = UserProfile.query.first()
@@ -233,6 +238,64 @@ def enrich_activity(act, ftp):
     }
 
 
+def _require_strava():
+    """Returns (header, athlete, profile, redirect_response). redirect_response is non-None on auth failure."""
+    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+        return None, None, None, redirect(url_for('auth'))
+    try:
+        access_token = refresh_strava_token()
+    except requests.HTTPError as e:
+        if e.response.status_code == 401:
+            os.environ.pop('STRAVA_REFRESH_TOKEN', None)
+            set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+            return None, None, None, redirect(url_for('auth'))
+        raise
+    header = {'Authorization': f'Bearer {access_token}'}
+    athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
+    athlete_resp.raise_for_status()
+    return header, athlete_resp.json(), get_user_profile(), None
+
+
+def _extract_used_timezones(acts_raw):
+    used_tz_raw = [act.get('timezone', '') for act in acts_raw if act.get('timezone')]
+    return list(dict.fromkeys(
+        m.group(1) for raw in used_tz_raw
+        if (m := re.search(r'\)\s*(.+)$', raw))
+    ))
+
+
+def _calc_weekly_stats(acts_raw, ftp, profile):
+    tz = pytz.timezone(profile.timezone)
+    now_local = datetime.now(tz)
+    week_start_local = (now_local - timedelta(days=now_local.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    week_start_utc = week_start_local.astimezone(timezone.utc).replace(tzinfo=None)
+
+    weekly_tss = 0.0
+    weekly_km = 0.0
+    weekly_time_sec = 0
+
+    for act in acts_raw:
+        if act.get('sport_type') not in BIKE_SPORT_TYPES:
+            continue
+        utc_dt = datetime.fromisoformat(act.get('start_date', '1970-01-01T00:00:00Z').rstrip('Z'))
+        if utc_dt < week_start_utc:
+            continue
+        if act.get('device_watts') and act.get('weighted_average_watts'):
+            tss = calc_tss(act['moving_time'], act['weighted_average_watts'], ftp)
+            if tss:
+                weekly_tss += tss
+        weekly_km += act.get('distance', 0) / 1000
+        weekly_time_sec += act.get('moving_time', 0)
+
+    return {
+        'weekly_tss': round(weekly_tss, 1),
+        'weekly_km': round(weekly_km, 1),
+        'weekly_time': format_duration(weekly_time_sec),
+    }
+
+
 @app.route('/auth')
 def auth():
     client_id = os.getenv('STRAVA_CLIENT_ID', '')
@@ -325,23 +388,12 @@ def api_profile_put():
 
 @app.route('/')
 def index():
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
-        return redirect(url_for('auth'))
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
 
-    try:
-        access_token = refresh_strava_token()
-    except requests.HTTPError as e:
-        if e.response.status_code == 401:
-            os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-            set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
-            return redirect(url_for('auth'))
-        raise
-
-    header = {'Authorization': f'Bearer {access_token}'}
-
-    athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
-    athlete_resp.raise_for_status()
-    athlete = athlete_resp.json()
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg
 
     acts_raw = fetch_activities_90d(header)
     if acts_raw is None:
@@ -349,64 +401,26 @@ def index():
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
         return redirect(url_for('auth'))
 
-    profile = get_user_profile()
-    ftp = profile.ftp_watts
-    weight_kg = profile.weight_kg
-
-    BIKE_SPORT_TYPES = {
-        'Ride', 'MountainBikeRide', 'GravelRide', 'VirtualRide',
-        'EBikeRide', 'Velomobile', 'Handcycle',
-    }
-    bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
-    activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
-
-    tz = pytz.timezone(profile.timezone)
-    now_local = datetime.now(tz)
-    week_start_local = (now_local - timedelta(days=now_local.weekday())).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
-    week_start_utc = week_start_local.astimezone(timezone.utc).replace(tzinfo=None)
-    this_week = [a for a in activities if a['utc_dt'] >= week_start_utc]
-
-    weekly_tss = round(sum(a['tss'] for a in this_week if a['tss'] is not None), 1)
-    weekly_km = round(sum(a['distance_km'] for a in this_week), 1)
-    weekly_time = format_duration(sum(a['moving_time_sec'] for a in this_week))
-
-    used_tz_raw = [act.get('timezone', '') for act in acts_raw if act.get('timezone')]
-    used_timezones = list(dict.fromkeys(
-        m.group(1) for raw in used_tz_raw
-        if (m := re.search(r'\)\s*(.+)$', raw))
-    ))
-
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
-    chart_data = {
-        'labels': pmc['labels'][-42:],
-        'ctl': pmc['ctl'][-42:],
-        'atl': pmc['atl'][-42:],
-        'tsb': pmc['tsb'][-42:],
-    }
-
     tsb_status = calc_tsb_status(pmc['current_tsb'])
-    ftp_progress = calc_ftp_progress(ftp, weight_kg)
-    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
+    stats = _calc_weekly_stats(acts_raw, ftp, profile)
+    used_timezones = _extract_used_timezones(acts_raw)
 
     return render_template(
         'index.html',
-        activities=activities,
         athlete=athlete,
         ftp=ftp,
         weight_kg=weight_kg,
-        weekly_tss=weekly_tss,
-        weekly_km=weekly_km,
-        weekly_time=weekly_time,
         pmc=pmc,
-        chart_data=chart_data,
         tsb_status=tsb_status,
-        ftp_progress=ftp_progress,
-        wuling=wuling,
+        weekly_tss=stats['weekly_tss'],
+        weekly_km=stats['weekly_km'],
+        weekly_time=stats['weekly_time'],
         timezone=profile.timezone,
         used_timezones=used_timezones,
         all_timezones=pytz.all_timezones,
+        target_race=None,
+        active_tab='dashboard',
     )
 
 
@@ -445,10 +459,6 @@ def api_export_for_ai():
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
 
-    BIKE_SPORT_TYPES = {
-        'Ride', 'MountainBikeRide', 'GravelRide', 'VirtualRide',
-        'EBikeRide', 'Velomobile', 'Handcycle',
-    }
     bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
     activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
 
@@ -524,6 +534,105 @@ def api_export_for_ai():
     resp = app.response_class(response=cache_str, mimetype='application/json')
     resp.headers['X-Cache'] = 'MISS'
     return resp
+
+
+@app.route('/analysis')
+def analysis():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg
+
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
+        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
+        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        return redirect(url_for('auth'))
+
+    bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
+    activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    chart_data = {
+        'labels': pmc['labels'][-42:],
+        'ctl': pmc['ctl'][-42:],
+        'atl': pmc['atl'][-42:],
+        'tsb': pmc['tsb'][-42:],
+    }
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    used_timezones = _extract_used_timezones(acts_raw)
+
+    return render_template(
+        'analysis.html',
+        athlete=athlete,
+        ftp=ftp,
+        weight_kg=weight_kg,
+        activities=activities,
+        pmc=pmc,
+        chart_data=chart_data,
+        tsb_status=tsb_status,
+        timezone=profile.timezone,
+        used_timezones=used_timezones,
+        all_timezones=pytz.all_timezones,
+        active_tab='analysis',
+    )
+
+
+@app.route('/racing')
+def racing():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg
+
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
+        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
+        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        return redirect(url_for('auth'))
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    ftp_progress = calc_ftp_progress(ftp, weight_kg)
+    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
+    used_timezones = _extract_used_timezones(acts_raw)
+
+    return render_template(
+        'racing.html',
+        athlete=athlete,
+        ftp=ftp,
+        weight_kg=weight_kg,
+        pmc=pmc,
+        tsb_status=tsb_status,
+        ftp_progress=ftp_progress,
+        wuling=wuling,
+        timezone=profile.timezone,
+        used_timezones=used_timezones,
+        all_timezones=pytz.all_timezones,
+        active_tab='racing',
+    )
+
+
+@app.route('/profile')
+def profile_page():
+    header, athlete, profile, redir = _require_strava()
+    if redir:
+        return redir
+
+    return render_template(
+        'profile.html',
+        athlete=athlete,
+        ftp=profile.ftp_watts,
+        weight_kg=profile.weight_kg,
+        timezone=profile.timezone,
+        used_timezones=[],
+        all_timezones=pytz.all_timezones,
+        active_tab='profile',
+    )
 
 
 if __name__ == '__main__':
