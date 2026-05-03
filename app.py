@@ -423,6 +423,12 @@ def index():
         return redirect(url_for('auth'))
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    chart_data = {
+        'labels': pmc['labels'][-42:],
+        'ctl': pmc['ctl'][-42:],
+        'atl': pmc['atl'][-42:],
+        'tsb': pmc['tsb'][-42:],
+    }
     tsb_status = calc_tsb_status(pmc['current_tsb'])
     stats = _calc_weekly_stats(acts_raw, ftp, profile)
     used_timezones = _extract_used_timezones(acts_raw)
@@ -433,6 +439,7 @@ def index():
         ftp=ftp,
         weight_kg=weight_kg,
         pmc=pmc,
+        chart_data=chart_data,
         tsb_status=tsb_status,
         weekly_tss=stats['weekly_tss'],
         weekly_km=stats['weekly_km'],
@@ -459,6 +466,12 @@ def partial_dashboard():
         return redirect(url_for('auth'))
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    chart_data = {
+        'labels': pmc['labels'][-42:],
+        'ctl': pmc['ctl'][-42:],
+        'atl': pmc['atl'][-42:],
+        'tsb': pmc['tsb'][-42:],
+    }
     tsb_status = calc_tsb_status(pmc['current_tsb'])
     stats = _calc_weekly_stats(acts_raw, ftp, profile)
     used_timezones = _extract_used_timezones(acts_raw)
@@ -469,6 +482,7 @@ def partial_dashboard():
         ftp=ftp,
         weight_kg=profile.weight_kg,
         pmc=pmc,
+        chart_data=chart_data,
         tsb_status=tsb_status,
         weekly_tss=stats['weekly_tss'],
         weekly_km=stats['weekly_km'],
