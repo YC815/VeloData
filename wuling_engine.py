@@ -1,3 +1,5 @@
+from math import ceil
+
 ROUTE_DISTANCE_KM = 52.56   # 地理中心碑→武嶺，8段合計
 ROUTE_ELEVATION_M = 2593    # 各段 grade×distance 合計
 
@@ -66,3 +68,17 @@ class WulingPredictor:
             "total_minutes":  total_sec / 60,
             "details":        details,
         }
+
+
+def calc_subx_ftp(target_minutes, weight_kg, tsb=0):
+    """Binary search：求達到 target_minutes 所需的最低 FTP。"""
+    total_mass = weight_kg + 8
+    lo, hi = 100.0, 600.0
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        pred = WulingPredictor(ftp=mid, weight_kg=total_mass, tsb=tsb).simulate()
+        if pred["total_minutes"] <= target_minutes:
+            hi = mid
+        else:
+            lo = mid
+    return ceil(hi)
