@@ -87,6 +87,27 @@ def fetch_activities_90d(header):
     return resp.json()
 
 
+_activity_cache: list | None = None
+_activity_cache_at: datetime | None = None
+_ACTIVITY_CACHE_TTL = 300  # 5 分鐘
+
+
+def _fetch_activities_cached(header: dict) -> list | None:
+    global _activity_cache, _activity_cache_at
+    now = datetime.now()
+    if (
+        _activity_cache is not None
+        and _activity_cache_at is not None
+        and (now - _activity_cache_at).total_seconds() < _ACTIVITY_CACHE_TTL
+    ):
+        return _activity_cache
+    data = fetch_activities_90d(header)
+    if data is not None:
+        _activity_cache = data
+        _activity_cache_at = now
+    return data
+
+
 def calc_pmc(activities_raw, ftp, tz_str='Asia/Taipei'):
     tss_by_date = {}
     has_suffer_fallback = False
@@ -395,7 +416,7 @@ def index():
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
 
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
@@ -431,7 +452,7 @@ def partial_dashboard():
         return redir
 
     ftp = profile.ftp_watts
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
@@ -467,7 +488,7 @@ def partial_analysis():
 
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
@@ -509,7 +530,7 @@ def partial_racing():
 
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
@@ -581,7 +602,7 @@ def api_export_for_ai():
     athlete_resp.raise_for_status()
     athlete = athlete_resp.json()
 
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         return jsonify({'error': '無法取得活動資料'}), 401
 
@@ -674,7 +695,7 @@ def analysis():
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
 
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
@@ -718,7 +739,7 @@ def racing():
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
 
-    acts_raw = fetch_activities_90d(header)
+    acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
         set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
