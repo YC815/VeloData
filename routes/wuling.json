@@ -1,0 +1,30 @@
+{
+  "id": "wuling",
+  "name": "西進武嶺",
+  "description": "地理中心碑→武嶺",
+  "distance_km": 52.56,
+  "elevation_m": 2593,
+  "bike_weight_kg": 8,
+  "physics": {
+    "Crr": 0.004,
+    "CdA": 0.35,
+    "rho": 1.15,
+    "loss": 0.03
+  },
+  "sub_x_targets": [
+    {"label": "破 3 小時",   "minutes": 180},
+    {"label": "破 3.5 小時", "minutes": 210},
+    {"label": "破 4 小時",   "minutes": 240},
+    {"label": "破 4.5 小時", "minutes": 270}
+  ],
+  "segments": [
+    {"name": "地理中心碑-人止關", "dist": 16.29, "grade": 0.018, "alt_decay": 1.00},
+    {"name": "人止關-霧社",       "dist":  5.67, "grade": 0.064, "alt_decay": 0.98},
+    {"name": "霧社-見晴",         "dist":  5.48, "grade": 0.067, "alt_decay": 0.95},
+    {"name": "見晴-最高小7",      "dist":  3.10, "grade": 0.101, "alt_decay": 0.92},
+    {"name": "最高小7-翠峰",      "dist":  8.42, "grade": 0.036, "alt_decay": 0.88},
+    {"name": "翠峰-鳶峰",         "dist":  6.38, "grade": 0.067, "alt_decay": 0.84},
+    {"name": "鳶峰-昆陽",         "dist":  5.09, "grade": 0.066, "alt_decay": 0.80},
+    {"name": "昆陽-武嶺",         "dist":  2.13, "grade": 0.089, "alt_decay": 0.77}
+  ]
+}

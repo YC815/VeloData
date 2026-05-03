@@ -1,0 +1,125 @@
+"""
+通用路段預測引擎。
+
+路線定義從 routes/*.json 讀入，支援任意路線擴充。
+新增路線只需在 routes/ 目錄放一份符合 schema 的 JSON 即可。
+"""
+from __future__ import annotations
+
+import json
+import os
+from math import ceil
+from typing import Any
+
+_ROUTES_DIR = os.path.join(os.path.dirname(__file__), "routes")
+
+
+def load_route(route_id: str) -> dict[str, Any]:
+    """從 routes/<route_id>.json 載入路線定義。"""
+    path = os.path.join(_ROUTES_DIR, f"{route_id}.json")
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def list_routes() -> list[dict[str, str]]:
+    """列出所有可用路線的 id 與 name。"""
+    result = []
+    for fname in sorted(os.listdir(_ROUTES_DIR)):
+        if fname.endswith(".json"):
+            data = load_route(fname[:-5])
+            result.append({"id": data["id"], "name": data["name"]})
+    return result
+
+
+class RoutePredictor:
+    """
+    給定路線 JSON、FTP、體重、TSB，進行正向速度模擬。
+
+    Args:
+        route:     load_route() 回傳的路線 dict
+        ftp:       功能性閾值功率（W）
+        weight_kg: 系統總重（騎手 + 車重），單位 kg
+        tsb:       訓練壓力平衡值，預設 0
+    """
+
+    def __init__(self, route: dict, ftp: float, weight_kg: float, tsb: float = 0):
+        self.route = route
+        self.ftp = ftp
+        self.weight = weight_kg
+        self.tsb = max(-40.0, min(float(tsb), 20.0))
+
+        p = route["physics"]
+        self.Crr  = p["Crr"]
+        self.CdA  = p["CdA"]
+        self.rho  = p["rho"]
+        self.loss = p["loss"]
+
+    def _effective_ftp(self) -> float:
+        return self.ftp * (1 + self.tsb * 0.002)
+
+    def _solve_velocity(self, power: float, grade: float) -> float:
+        if power <= 0:
+            return 0.0
+        g = 9.81
+        p_wheel = power * (1 - self.loss)
+        lo, hi = 0.0, 20.0
+        for _ in range(40):
+            v = (lo + hi) / 2
+            p_req = v * (self.weight * g * (grade + self.Crr)) + 0.5 * self.rho * self.CdA * v ** 3
+            if p_req < p_wheel:
+                lo = v
+            else:
+                hi = v
+        return (lo + hi) / 2
+
+    def simulate(self) -> dict[str, Any]:
+        base = self._effective_ftp()
+        total_sec = 0.0
+        details = []
+
+        for seg in self.route["segments"]:
+            seg_power = base * seg["alt_decay"]
+            v_ms = self._solve_velocity(seg_power, seg["grade"])
+            seg_sec = (seg["dist"] * 1000) / v_ms if v_ms > 0 else float("inf")
+            total_sec += seg_sec
+            details.append({
+                "name":      seg["name"],
+                "power":     round(seg_power, 1),
+                "speed_kmh": round(v_ms * 3.6, 1),
+                "time_mins": round(seg_sec / 60, 1),
+            })
+
+        h = int(total_sec // 3600)
+        m = int((total_sec % 3600) // 60)
+        return {
+            "total_time_str": f"{h} 小時 {m:02d} 分鐘",
+            "total_minutes":  total_sec / 60,
+            "details":        details,
+        }
+
+
+def calc_subx_ftp(
+    route: dict,
+    target_minutes: float,
+    weight_kg: float,
+    tsb: float = 0,
+) -> int:
+    """
+    Binary search：求達到 target_minutes 完賽所需的最低 FTP。
+
+    Args:
+        route:          load_route() 回傳的路線 dict
+        target_minutes: 目標完賽時間（分鐘）
+        weight_kg:      騎手體重（kg），自動加上 route 定義的 bike_weight_kg
+        tsb:            訓練壓力平衡值
+    """
+    total_mass = weight_kg + route.get("bike_weight_kg", 8)
+    lo, hi = 100.0, 600.0
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        pred = RoutePredictor(route=route, ftp=mid, weight_kg=total_mass, tsb=tsb).simulate()
+        if pred["total_minutes"] <= target_minutes:
+            hi = mid
+        else:
+            lo = mid
+    return ceil(hi)
