@@ -19,5 +19,21 @@
     <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
     <script src="{{ url_for('static', filename='js/copy_for_ai.js') }}"></script>
     {% block scripts %}{% endblock %}
+    <script>
+      document.body.addEventListener('htmx:beforeRequest', function (e) {
+        var target = e.detail.target;
+        if (!target || target.id !== 'content') return;
+        target.innerHTML =
+          '<div class="animate-pulse space-y-4 py-2">' +
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+              '<div class="h-32 bg-slate-800 rounded-xl"></div>' +
+              '<div class="h-32 bg-slate-800 rounded-xl"></div>' +
+            '</div>' +
+            '<div class="h-20 bg-slate-800 rounded-xl"></div>' +
+            '<div class="h-72 bg-slate-800 rounded-xl"></div>' +
+            '<div class="h-48 bg-slate-800 rounded-xl"></div>' +
+          '</div>';
+      });
+    </script>
   </body>
 </html>
