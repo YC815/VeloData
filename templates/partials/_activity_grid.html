@@ -1,5 +1,24 @@
 <div class="flex items-center justify-between mb-4 px-2 gap-3 flex-wrap">
-  <h2 class="text-xl font-bold text-slate-300">最近騎乘資料</h2>
+  <div class="flex items-center gap-2 relative group">
+    <h2 class="text-xl font-bold text-slate-300">最近騎乘資料</h2>
+    <div class="w-5 h-5 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center cursor-help text-slate-400 text-xs font-bold hover:bg-slate-600 hover:text-slate-200 transition-colors">?</div>
+    <div class="absolute left-0 top-7 w-80 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-300 leading-relaxed shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+      <div class="space-y-3">
+        <div>
+          <p class="font-semibold text-slate-100 mb-0.5">TSS（訓練壓力分數）</p>
+          <p>這趟騎乘「讓你多累」的總量。100 分大約等於全力騎一小時的疲勞感。<span class="text-slate-400">騎完 &lt; 50 隔天沒問題；150+ 需要認真休息。</span></p>
+        </div>
+        <div class="border-t border-slate-700 pt-3">
+          <p class="font-semibold text-slate-100 mb-0.5">NP（標準化功率）</p>
+          <p>比均瓦更誠實的強度數字。市區走走停停均瓦看起來低，但 NP 會抓出你那幾腳猛踩對身體的真實傷害。<span class="text-slate-400">NP 比均瓦高越多，代表騎乘越不穩定。</span></p>
+        </div>
+        <div class="border-t border-slate-700 pt-3">
+          <p class="font-semibold text-slate-100 mb-0.5">IF（強度因子）</p>
+          <p>這趟騎乘有多「硬」，以你的 FTP 為基準。<span class="text-slate-400">0.75 以下輕鬆恢復騎、0.85–0.95 甜區訓練、1.0 以上就是在逼極限。</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="flex items-center gap-2">
     <span id="actPageInfo" class="text-xs text-slate-500"></span>
     <select
@@ -68,25 +87,40 @@
           {% if act.avg_speed_kmh %}{{ act.avg_speed_kmh }} <span class="text-slate-500 font-normal text-xs">km/h</span>{% else %}—{% endif %}
         </div>
       </div>
-      <div class="bg-slate-900/80 px-3 py-2.5">
-        <div class="text-xs text-slate-500 mb-0.5">均瓦</div>
-        <div class="text-sm font-mono font-semibold {% if act.has_power %}text-orange-300{% else %}text-slate-600{% endif %}">
-          {% if act.has_power and act.avg_watts %}{{ act.avg_watts }} <span class="font-normal text-xs">W</span>{% else %}—{% endif %}
+      <div class="col-span-2 bg-slate-900/80 px-3 py-2.5">
+        <div class="text-xs text-slate-500 mb-1">功率表現</div>
+        {% if act.has_power and act.avg_watts %}
+        <div class="text-sm font-mono font-semibold text-orange-300">
+          均瓦 {{ act.avg_watts }}<span class="text-xs font-normal"> W</span>
+          <span class="text-slate-600 mx-1">|</span>
+          NP {{ act.weighted_watts or '—' }}<span class="text-xs font-normal"> W</span>
         </div>
+        {% if act.vi %}
+        <div class="text-xs text-slate-400 mt-0.5">變異指數 (VI)：{{ act.vi }}</div>
+        {% endif %}
+        {% else %}
+        <div class="text-sm font-mono font-semibold text-slate-600">—</div>
+        {% endif %}
       </div>
-      <div class="bg-slate-900/80 px-3 py-2.5 rounded-br-2xl">
+      <div class="bg-slate-900/80 px-3 py-2.5">
         <div class="text-xs text-slate-500 mb-0.5">踏頻</div>
         <div class="text-sm font-mono font-semibold text-slate-100">
           {% if act.avg_cadence %}{{ act.avg_cadence }} <span class="text-slate-500 font-normal text-xs">rpm</span>{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="bg-slate-900/80 px-3 py-2.5 rounded-br-2xl">
+        <div class="text-xs text-slate-500 mb-0.5">心率</div>
+        <div class="text-sm font-mono font-semibold text-slate-100">
+          {% if act.avg_hr %}{{ act.avg_hr }} <span class="text-slate-500 font-normal text-xs">bpm</span>{% else %}—{% endif %}
         </div>
       </div>
     </div>
 
     {% if act.interpretation %}
     <div class="px-4 py-2.5 border-t border-slate-800 text-xs text-slate-500 rounded-b-2xl">
-      IF <span class="font-mono text-slate-400">{{ act.if_value }}</span>
-      <span class="mx-1 text-slate-700">·</span>
       <span class="text-slate-400">{{ act.interpretation }}</span>
+      <span class="mx-1 text-slate-700">·</span>
+      IF <span class="font-mono text-slate-400">{{ act.if_value }}</span>
     </div>
     {% elif act.suffer_score %}
     <div class="px-4 py-2.5 border-t border-slate-800 text-xs text-slate-600 rounded-b-2xl">

@@ -220,6 +220,7 @@ def enrich_activity(act, ftp):
         'has_power': bool(act.get('device_watts')),
         'avg_watts': round(act['average_watts']) if act.get('device_watts') and act.get('average_watts') else None,
         'weighted_watts': round(act['weighted_average_watts']) if act.get('device_watts') and act.get('weighted_average_watts') else None,
+        'vi': round(act['weighted_average_watts'] / act['average_watts'], 2) if act.get('device_watts') and act.get('average_watts') and act.get('weighted_average_watts') and act['average_watts'] > 0 else None,
         'has_hr': bool(act.get('has_heartrate')),
         'avg_hr': round(act['average_heartrate']) if act.get('has_heartrate') and act.get('average_heartrate') else None,
         'avg_speed_kmh': round(act['average_speed'] * 3.6, 1) if act.get('average_speed') else None,
