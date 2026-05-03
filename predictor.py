@@ -55,7 +55,26 @@ class RoutePredictor:
         self.loss = p["loss"]
 
     def _effective_ftp(self) -> float:
-        return self.ftp * (1 + self.tsb * 0.002)
+        # Solo 獨推模型；TSB 係數 0.001（疲勞對個人爬坡影響小於集團）
+        return self.ftp * (1 + self.tsb * 0.001)
+
+    @staticmethod
+    def _intensity_factor(estimated_mins: float) -> float:
+        """
+        動態強度係數（IF）：依預估完賽時間對應功率持續時間曲線。
+        < 30 min  → VO2max 區間（可輸出 FTP × 1.10）
+        30–60 min → 門檻區間（FTP × 1.00）
+        1–3 hr    → 甜區/節奏（FTP × 0.88）
+        > 3 hr    → 有氧耐力（FTP × 0.82）
+        """
+        if estimated_mins <= 30:
+            return 1.10
+        elif estimated_mins <= 60:
+            return 1.00
+        elif estimated_mins <= 180:
+            return 0.88
+        else:
+            return 0.82
 
     def _solve_velocity(self, power: float, grade: float) -> float:
         if power <= 0:
@@ -74,6 +93,15 @@ class RoutePredictor:
 
     def simulate(self) -> dict[str, Any]:
         base = self._effective_ftp()
+
+        # 兩輪收斂：先以 IF=1.10 粗估（偏樂觀），取得合理時間後再查正確 IF
+        pre_sec = sum(
+            (seg["dist"] * 1000) / max(self._solve_velocity(base * 1.10 * seg["alt_decay"], seg["grade"]), 1e-6)
+            for seg in self.route["segments"]
+        )
+        if_factor = self._intensity_factor(pre_sec / 60)
+        base = base * if_factor
+
         total_sec = 0.0
         details = []
 
@@ -94,6 +122,7 @@ class RoutePredictor:
         return {
             "total_time_str": f"{h} 小時 {m:02d} 分鐘",
             "total_minutes":  total_sec / 60,
+            "if_factor":      if_factor,
             "details":        details,
         }
 
