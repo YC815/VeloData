@@ -409,5 +409,121 @@ def index():
     )
 
 
+@app.route('/api/export-for-ai')
+def api_export_for_ai():
+    import json as _json
+
+    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+        return jsonify({'error': '未授權'}), 401
+
+    profile = get_user_profile()
+
+    if profile.is_export_cache_valid():
+        resp = app.response_class(
+            response=profile.export_cache,
+            mimetype='application/json'
+        )
+        resp.headers['X-Cache'] = 'HIT'
+        return resp
+
+    try:
+        access_token = refresh_strava_token()
+    except requests.HTTPError:
+        return jsonify({'error': 'Token 刷新失敗'}), 401
+
+    header = {'Authorization': f'Bearer {access_token}'}
+
+    athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
+    athlete_resp.raise_for_status()
+    athlete = athlete_resp.json()
+
+    acts_raw = fetch_activities_90d(header)
+    if acts_raw is None:
+        return jsonify({'error': '無法取得活動資料'}), 401
+
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg
+
+    BIKE_SPORT_TYPES = {
+        'Ride', 'MountainBikeRide', 'GravelRide', 'VirtualRide',
+        'EBikeRide', 'Velomobile', 'Handcycle',
+    }
+    bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
+    activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    tsb_status = calc_tsb_status(pmc['current_tsb'])
+    ftp_progress = calc_ftp_progress(ftp, weight_kg)
+    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
+
+    tz = pytz.timezone(profile.timezone)
+    now_local = datetime.now(tz)
+    week_start_local = (now_local - timedelta(days=now_local.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    week_start_utc = week_start_local.astimezone(timezone.utc).replace(tzinfo=None)
+    this_week = [a for a in activities if a['utc_dt'] >= week_start_utc]
+
+    weekly_tss = round(sum(a['tss'] for a in this_week if a['tss'] is not None), 1)
+    weekly_km = round(sum(a['distance_km'] for a in this_week), 1)
+    weekly_time = format_duration(sum(a['moving_time_sec'] for a in this_week))
+
+    recent_activities = []
+    for act in activities[:10]:
+        recent_activities.append({
+            'name': act['name'],
+            'date': act['date_display'],
+            'sport_type': act['sport_type'],
+            'distance_km': act['distance_km'],
+            'duration': act['duration'],
+            'elevation_m': act['elevation_m'],
+            'avg_speed_kmh': act['avg_speed_kmh'],
+            'avg_watts': act['avg_watts'],
+            'weighted_watts': act['weighted_watts'],
+            'avg_hr': act['avg_hr'],
+            'avg_cadence': act['avg_cadence'],
+            'tss': act['tss'],
+            'if_value': act['if_value'],
+            'interpretation': act['interpretation'],
+            'recovery_note': act['recovery_note'],
+        })
+
+    payload = {
+        'athlete': {
+            'name': f"{athlete.get('firstname', '')} {athlete.get('lastname', '')}".strip(),
+            'ftp_watts': ftp,
+            'weight_kg': weight_kg,
+            'w_per_kg': ftp_progress['w_per_kg'],
+        },
+        'current_fitness': {
+            'ctl': pmc['current_ctl'],
+            'atl': pmc['current_atl'],
+            'tsb': pmc['current_tsb'],
+            'status': tsb_status['label'],
+        },
+        'this_week': {
+            'tss': weekly_tss,
+            'distance_km': weekly_km,
+            'time': weekly_time,
+        },
+        'wuling_prediction': {
+            'current_time': wuling['current']['time_display'],
+            'ideal_time': wuling['ideal']['time_display'],
+            'delta_mins': wuling['delta_mins'],
+        },
+        'recent_activities': recent_activities,
+        'generated_at': now_local.strftime('%Y-%m-%d %H:%M'),
+    }
+
+    cache_str = _json.dumps(payload, ensure_ascii=False)
+    profile.export_cache = cache_str
+    profile.export_cache_at = datetime.utcnow()
+    db.session.commit()
+
+    resp = app.response_class(response=cache_str, mimetype='application/json')
+    resp.headers['X-Cache'] = 'MISS'
+    return resp
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
