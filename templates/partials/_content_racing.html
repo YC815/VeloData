@@ -1,5 +1,15 @@
-  {% include 'partials/_race_list.html' %}
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    {% include 'partials/_kpi_wuling.html' %}
-    {% include 'partials/_kpi_ftp_progress.html' %}
-  </div>
+<!-- 區塊一：近期目標賽事 -->
+{% include 'partials/_race_list.html' %}
+
+<!-- 區塊二：指標路段挑戰 (Benchmark Lab) -->
+<div class="mb-6">
+  {% include 'partials/_kpi_wuling.html' %}
+</div>
+
+<!-- FTP 進度（輔助資訊，保留在 Benchmark Lab 下方） -->
+<div class="mb-6">
+  {% include 'partials/_kpi_ftp_progress.html' %}
+</div>
+
+<!-- 區塊三：賽事管理清單 -->
+{% include 'partials/_event_manager.html' %}

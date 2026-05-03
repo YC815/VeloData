@@ -1,0 +1,94 @@
+<!-- 單一賽事卡片，需要 event 變數 -->
+<div class="bg-slate-900 border rounded-2xl p-4 shadow-lg
+  {% if event.priority == 'A' %}border-orange-500/40
+  {% elif event.priority == 'B' %}border-blue-500/30
+  {% else %}border-slate-700{% endif %}">
+
+  <!-- 標頭：優先級 + 名稱 -->
+  <div class="flex items-start justify-between mb-3">
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono
+        {% if event.priority == 'A' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
+        {% elif event.priority == 'B' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
+        {% else %}bg-slate-700 text-slate-400{% endif %}">
+        {{ event.priority }}
+      </span>
+      <h4 class="text-sm font-semibold text-slate-200">{{ event.name }}</h4>
+    </div>
+    {% if event.days_until is not none %}
+    <div class="text-right flex-shrink-0 ml-2">
+      {% if event.days_until == 0 %}
+        <span class="text-[10px] font-mono text-red-400 font-bold">今天！</span>
+      {% elif event.days_until <= 7 %}
+        <span class="text-[10px] font-mono text-orange-400 font-bold">{{ event.days_until }}天後</span>
+      {% elif event.days_until <= 30 %}
+        <span class="text-[10px] font-mono text-yellow-400">{{ event.days_until }}天後</span>
+      {% else %}
+        <span class="text-[10px] font-mono text-slate-500">{{ event.days_until }}天後</span>
+      {% endif %}
+      <p class="text-[10px] text-slate-600">{{ event.date_display }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 路線資訊 -->
+  <div class="flex items-center gap-3 mb-3 text-[11px] text-slate-500">
+    {% if event.distance_km %}
+    <span class="flex items-center gap-1">
+      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+      </svg>
+      {{ event.distance_km }} km
+    </span>
+    {% endif %}
+    {% if event.elevation_m %}
+    <span class="flex items-center gap-1">
+      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
+      </svg>
+      {{ event.elevation_m }} m ↑
+    </span>
+    {% endif %}
+  </div>
+
+  <!-- TSB 狀態警告 -->
+  {% if pmc and pmc.current_tsb is not none %}
+  {% set tsb = pmc.current_tsb %}
+  <div class="flex items-center gap-2 rounded-lg px-2.5 py-1.5
+    {% if tsb < -20 %}bg-red-500/10 border border-red-500/20
+    {% elif tsb < 0 %}bg-yellow-500/10 border border-yellow-500/20
+    {% else %}bg-green-500/10 border border-green-500/20{% endif %}">
+    <svg class="w-3 h-3 flex-shrink-0
+      {% if tsb < -20 %}text-red-400{% elif tsb < 0 %}text-yellow-400{% else %}text-green-400{% endif %}"
+      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      {% if tsb < -20 %}
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      {% elif tsb < 0 %}
+      <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
+      {% else %}
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      {% endif %}
+    </svg>
+    <p class="text-[10px]
+      {% if tsb < -20 %}text-red-400{% elif tsb < 0 %}text-yellow-400{% else %}text-green-400{% endif %}">
+      TSB {{ tsb }}
+      {% if tsb < -20 %}· 過度訓練，賽前須休息
+      {% elif tsb < 0 %}· 輕微疲勞
+      {% else %}· 狀態良好{% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- FTP 達成率 -->
+  {% if ftp_progress %}
+  <div class="mt-3 pt-3 border-t border-slate-800">
+    <div class="flex justify-between items-center mb-1">
+      <span class="text-[10px] text-slate-600">目標時間達成率</span>
+      <span class="text-[10px] font-mono text-orange-400">FTP {{ ftp_progress.progress_pct }}%</span>
+    </div>
+    <div class="w-full bg-slate-800 rounded-full h-1">
+      <div class="bg-orange-500 h-1 rounded-full" style="width: {{ ftp_progress.progress_pct }}%"></div>
+    </div>
+  </div>
+  {% endif %}
+</div>
