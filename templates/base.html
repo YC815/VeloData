@@ -16,6 +16,8 @@
         {% block content %}{% endblock %}
       </main>
     </div>
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/copy_for_ai.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
