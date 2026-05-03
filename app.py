@@ -282,13 +282,6 @@ def _get_upcoming_events():
             .all())
 
 
-def calc_ftp_progress(ftp, weight_kg):
-    target = 300
-    progress_pct = min(round(ftp / target * 100), 100)
-    w_per_kg = round(ftp / weight_kg, 2) if weight_kg else None
-    return {'current': ftp, 'target': target, 'progress_pct': progress_pct, 'w_per_kg': w_per_kg}
-
-
 def enrich_activity(act, ftp):
     local_dt = datetime.fromisoformat(act.get('start_date_local', '1970-01-01T00:00:00Z').rstrip('Z'))
     utc_dt = datetime.fromisoformat(act.get('start_date', '1970-01-01T00:00:00Z').rstrip('Z'))
@@ -712,7 +705,6 @@ def partial_racing():
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     tsb_status = calc_tsb_status(pmc['current_tsb'])
-    ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     all_benchmarks = calc_all_routes_benchmark(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
@@ -726,7 +718,6 @@ def partial_racing():
         weight_kg=weight_kg,
         pmc=pmc,
         tsb_status=tsb_status,
-        ftp_progress=ftp_progress,
         wuling=wuling,
         wuling_subx=wuling_subx,
         all_benchmarks=all_benchmarks,
@@ -795,7 +786,6 @@ def api_export_for_ai():
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     tsb_status = calc_tsb_status(pmc['current_tsb'])
-    ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
 
     tz = pytz.timezone(profile.timezone)
@@ -835,7 +825,7 @@ def api_export_for_ai():
             'name': f"{athlete.get('firstname', '')} {athlete.get('lastname', '')}".strip(),
             'ftp_watts': ftp,
             'weight_kg': weight_kg,
-            'w_per_kg': ftp_progress['w_per_kg'],
+            'w_per_kg': round(ftp / weight_kg, 2) if weight_kg else None,
         },
         'current_fitness': {
             'ctl': pmc['current_ctl'],
@@ -929,7 +919,6 @@ def racing():
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     tsb_status = calc_tsb_status(pmc['current_tsb'])
-    ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     all_benchmarks = calc_all_routes_benchmark(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
@@ -943,7 +932,6 @@ def racing():
         weight_kg=weight_kg,
         pmc=pmc,
         tsb_status=tsb_status,
-        ftp_progress=ftp_progress,
         wuling=wuling,
         wuling_subx=wuling_subx,
         all_benchmarks=all_benchmarks,

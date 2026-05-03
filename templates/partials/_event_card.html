@@ -79,16 +79,4 @@
   </div>
   {% endif %}
 
-  <!-- FTP 達成率 -->
-  {% if ftp_progress %}
-  <div class="mt-3 pt-3 border-t border-slate-800">
-    <div class="flex justify-between items-center mb-1">
-      <span class="text-[10px] text-slate-600">目標時間達成率</span>
-      <span class="text-[10px] font-mono text-orange-400">FTP {{ ftp_progress.progress_pct }}%</span>
-    </div>
-    <div class="w-full bg-slate-800 rounded-full h-1">
-      <div class="bg-orange-500 h-1 rounded-full" style="width: {{ ftp_progress.progress_pct }}%"></div>
-    </div>
-  </div>
-  {% endif %}
 </div>
