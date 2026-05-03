@@ -8,6 +8,7 @@ import pytz
 
 from db import db, UserProfile, RaceEvent, init_db
 from wuling_engine import WulingPredictor, ROUTE_DISTANCE_KM, calc_subx_ftp
+from predictor import RoutePredictor, load_route, list_routes, calc_subx_ftp as _route_calc_subx_ftp
 
 load_dotenv()
 app = Flask(__name__)
@@ -214,6 +215,56 @@ def calc_wuling_subx(ftp, weight_kg, tsb, bike_weight_kg=8.0):
             "gap_ftp": req_ftp - ftp,
             "gap_wkg": round((req_wkg or 0) - (w_per_kg or 0), 2),
             "achievable": ftp >= req_ftp,
+        })
+    return results
+
+
+def calc_all_routes_benchmark(ftp, weight_kg, tsb, bike_weight_kg=8.0):
+    """對 routes/ 下所有路線做預測，回傳列表供 Benchmark Lab 列表 UI 使用。"""
+    if not weight_kg:
+        return []
+    total_mass = weight_kg + bike_weight_kg
+    w_per_kg = round(ftp / weight_kg, 2)
+    results = []
+    for meta in list_routes():
+        route = load_route(meta["id"])
+        current = RoutePredictor(route=route, ftp=ftp, weight_kg=total_mass, tsb=tsb).simulate()
+        ideal   = RoutePredictor(route=route, ftp=ftp, weight_kg=total_mass, tsb=15).simulate()
+        delta   = round(current["total_minutes"] - ideal["total_minutes"])
+
+        subx = []
+        for t in route.get("sub_x_targets", []):
+            req_ftp = _route_calc_subx_ftp(
+                route=route, target_minutes=t["minutes"],
+                weight_kg=weight_kg, tsb=tsb, bike_weight_kg=bike_weight_kg
+            )
+            req_wkg = round(req_ftp / weight_kg, 2)
+            subx.append({
+                "label":      t["label"],
+                "minutes":    t["minutes"],
+                "req_ftp":    req_ftp,
+                "req_wkg":    req_wkg,
+                "gap_ftp":    req_ftp - ftp,
+                "gap_wkg":    round(req_wkg - w_per_kg, 2),
+                "achievable": ftp >= req_ftp,
+            })
+
+        results.append({
+            "id":          route["id"],
+            "name":        route["name"],
+            "description": route.get("description", ""),
+            "distance_km": route["distance_km"],
+            "elevation_m": route["elevation_m"],
+            "current_time": current["total_time_str"],
+            "ideal_time":   ideal["total_time_str"],
+            "current_mins": round(current["total_minutes"], 1),
+            "ideal_mins":   round(ideal["total_minutes"], 1),
+            "delta_mins":   delta,
+            "current_speed": round(route["distance_km"] / (current["total_minutes"] / 60), 1)
+                             if current["total_minutes"] > 0 else None,
+            "current_tsb":  round(tsb, 1),
+            "w_per_kg":     w_per_kg,
+            "subx":         subx,
         })
     return results
 
@@ -664,6 +715,7 @@ def partial_racing():
     ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
+    all_benchmarks = calc_all_routes_benchmark(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     used_timezones = _extract_used_timezones(acts_raw)
     upcoming_events = _get_upcoming_events()
 
@@ -677,6 +729,7 @@ def partial_racing():
         ftp_progress=ftp_progress,
         wuling=wuling,
         wuling_subx=wuling_subx,
+        all_benchmarks=all_benchmarks,
         upcoming_events=upcoming_events,
         timezone=profile.timezone,
         used_timezones=used_timezones,
@@ -879,6 +932,7 @@ def racing():
     ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
+    all_benchmarks = calc_all_routes_benchmark(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     used_timezones = _extract_used_timezones(acts_raw)
     upcoming_events = _get_upcoming_events()
 
@@ -892,6 +946,7 @@ def racing():
         ftp_progress=ftp_progress,
         wuling=wuling,
         wuling_subx=wuling_subx,
+        all_benchmarks=all_benchmarks,
         upcoming_events=upcoming_events,
         timezone=profile.timezone,
         used_timezones=used_timezones,
