@@ -233,7 +233,7 @@ def calc_all_routes_benchmark(ftp, weight_kg, tsb, bike_weight_kg=8.0):
         delta   = round(current["total_minutes"] - ideal["total_minutes"])
 
         subx = []
-        for t in route.get("sub_x_targets", []):
+        for t in sorted(route.get("sub_x_targets", []), key=lambda x: x["minutes"]):
             req_ftp = _route_calc_subx_ftp(
                 route=route, target_minutes=t["minutes"],
                 weight_kg=weight_kg, tsb=tsb, bike_weight_kg=bike_weight_kg
