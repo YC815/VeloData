@@ -6,8 +6,8 @@ from dotenv import load_dotenv, set_key, find_dotenv
 import requests
 import pytz
 
-from db import db, UserProfile, init_db
-from wuling_engine import WulingPredictor, ROUTE_DISTANCE_KM
+from db import db, UserProfile, RaceEvent, init_db
+from wuling_engine import WulingPredictor, ROUTE_DISTANCE_KM, calc_subx_ftp
 
 load_dotenv()
 app = Flask(__name__)
@@ -189,6 +189,46 @@ def calc_wuling(ftp, weight_kg, tsb):
         'ideal':      _pred_dict(ideal_pred, 15),
         'delta_mins': round(current_pred['total_minutes'] - ideal_pred['total_minutes']),
     }
+
+
+def calc_wuling_subx(ftp, weight_kg, tsb):
+    """計算破 3h/3.5h/4h/4.5h 所需 FTP，並回傳與當前 FTP 的落差。"""
+    if not weight_kg:
+        return []
+    targets = [
+        {"label": "破 3 小時", "minutes": 180},
+        {"label": "破 3.5 小時", "minutes": 210},
+        {"label": "破 4 小時", "minutes": 240},
+        {"label": "破 4.5 小時", "minutes": 270},
+    ]
+    results = []
+    w_per_kg = round(ftp / weight_kg, 2) if weight_kg else None
+    for t in targets:
+        req_ftp = calc_subx_ftp(t["minutes"], weight_kg, tsb)
+        req_wkg = round(req_ftp / weight_kg, 2) if weight_kg else None
+        results.append({
+            "label": t["label"],
+            "minutes": t["minutes"],
+            "req_ftp": req_ftp,
+            "req_wkg": req_wkg,
+            "gap_ftp": req_ftp - ftp,
+            "gap_wkg": round((req_wkg or 0) - (w_per_kg or 0), 2),
+            "achievable": ftp >= req_ftp,
+        })
+    return results
+
+
+def _get_upcoming_events():
+    """取得未來 90 天內的 A/B 級賽事，用於 Upcoming Events 卡片。"""
+    from datetime import date as _date
+    today = _date.today()
+    cutoff = today + timedelta(days=90)
+    return (RaceEvent.query
+            .filter(RaceEvent.event_date >= today)
+            .filter(RaceEvent.event_date <= cutoff)
+            .filter(RaceEvent.priority.in_(['A', 'B']))
+            .order_by(RaceEvent.event_date)
+            .all())
 
 
 def calc_ftp_progress(ftp, weight_kg):
@@ -407,6 +447,64 @@ def api_profile_put():
     return jsonify(profile.to_dict())
 
 
+@app.route('/api/events', methods=['GET'])
+def api_events_get():
+    from datetime import date as _date
+    cutoff = _date.today()
+    events = (RaceEvent.query
+              .filter(RaceEvent.event_date >= cutoff)
+              .order_by(RaceEvent.event_date)
+              .all())
+    return jsonify([e.to_dict() for e in events])
+
+
+@app.route('/api/events', methods=['POST'])
+def api_events_post():
+    data = request.get_json(force=True)
+    name = (data.get('name') or '').strip()
+    date_str = data.get('date') or ''
+    priority = data.get('priority') or 'C'
+
+    if not name:
+        return jsonify({'error': '賽事名稱不得為空'}), 400
+    if priority not in ('A', 'B', 'C'):
+        return jsonify({'error': '優先級必須為 A、B 或 C'}), 400
+    try:
+        from datetime import date as _date
+        event_date = _date.fromisoformat(date_str)
+    except ValueError:
+        return jsonify({'error': '日期格式錯誤，請用 YYYY-MM-DD'}), 400
+
+    distance = data.get('distance_km')
+    elevation = data.get('elevation_m')
+    try:
+        distance = float(distance) if distance not in (None, '') else None
+        elevation = int(elevation) if elevation not in (None, '') else None
+    except (ValueError, TypeError):
+        return jsonify({'error': '距離或爬升格式錯誤'}), 400
+
+    ev = RaceEvent(
+        name=name,
+        event_date=event_date,
+        priority=priority,
+        distance_km=distance,
+        elevation_m=elevation,
+    )
+    db.session.add(ev)
+    db.session.commit()
+    return jsonify(ev.to_dict()), 201
+
+
+@app.route('/api/events/<int:event_id>', methods=['DELETE'])
+def api_events_delete(event_id):
+    ev = RaceEvent.query.get(event_id)
+    if not ev:
+        return jsonify({'error': '找不到此賽事'}), 404
+    db.session.delete(ev)
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
 @app.route('/')
 def index():
     header, athlete, profile, redir = _require_strava()
@@ -554,7 +652,9 @@ def partial_racing():
     tsb_status = calc_tsb_status(pmc['current_tsb'])
     ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
+    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'])
     used_timezones = _extract_used_timezones(acts_raw)
+    upcoming_events = _get_upcoming_events()
 
     return render_template(
         'partials/_content_racing.html',
@@ -565,6 +665,8 @@ def partial_racing():
         tsb_status=tsb_status,
         ftp_progress=ftp_progress,
         wuling=wuling,
+        wuling_subx=wuling_subx,
+        upcoming_events=upcoming_events,
         timezone=profile.timezone,
         used_timezones=used_timezones,
         all_timezones=pytz.all_timezones,
@@ -763,7 +865,9 @@ def racing():
     tsb_status = calc_tsb_status(pmc['current_tsb'])
     ftp_progress = calc_ftp_progress(ftp, weight_kg)
     wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
+    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'])
     used_timezones = _extract_used_timezones(acts_raw)
+    upcoming_events = _get_upcoming_events()
 
     return render_template(
         'racing.html',
@@ -774,6 +878,8 @@ def racing():
         tsb_status=tsb_status,
         ftp_progress=ftp_progress,
         wuling=wuling,
+        wuling_subx=wuling_subx,
+        upcoming_events=upcoming_events,
         timezone=profile.timezone,
         used_timezones=used_timezones,
         all_timezones=pytz.all_timezones,

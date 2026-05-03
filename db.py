@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -26,6 +26,31 @@ class UserProfile(db.Model):
 
     def to_dict(self):
         return {'ftp_watts': self.ftp_watts, 'weight_kg': self.weight_kg, 'timezone': self.timezone}
+
+
+class RaceEvent(db.Model):
+    __tablename__ = 'race_event'
+    id         = db.Column(db.Integer, primary_key=True)
+    name       = db.Column(db.String(128), nullable=False)
+    event_date = db.Column(db.Date, nullable=False)
+    priority   = db.Column(db.String(1), nullable=False, default='C')
+    distance_km  = db.Column(db.Float, nullable=True)
+    elevation_m  = db.Column(db.Integer, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def to_dict(self):
+        today = date.today()
+        days_until = (self.event_date - today).days
+        return {
+            'id': self.id,
+            'name': self.name,
+            'date': self.event_date.isoformat(),
+            'date_display': self.event_date.strftime('%-m/%-d'),
+            'priority': self.priority,
+            'distance_km': self.distance_km,
+            'elevation_m': self.elevation_m,
+            'days_until': days_until,
+        }
 
 
 def get_profile(app) -> UserProfile:
