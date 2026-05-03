@@ -4,7 +4,6 @@
   "description": "地理中心碑→武嶺",
   "distance_km": 52.56,
   "elevation_m": 2593,
-  "bike_weight_kg": 8,
   "physics": {
     "Crr": 0.004,
     "CdA": 0.35,

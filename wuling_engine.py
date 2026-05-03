@@ -20,5 +20,5 @@ class WulingPredictor:
         return self._inner.simulate()
 
 
-def calc_subx_ftp(target_minutes, weight_kg, tsb=0):
-    return _calc_subx_ftp(route=_WULING, target_minutes=target_minutes, weight_kg=weight_kg, tsb=tsb)
+def calc_subx_ftp(target_minutes, weight_kg, tsb=0, bike_weight_kg=8.0):
+    return _calc_subx_ftp(route=_WULING, target_minutes=target_minutes, weight_kg=weight_kg, tsb=tsb, bike_weight_kg=bike_weight_kg)

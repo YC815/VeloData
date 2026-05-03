@@ -1,0 +1,361 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - heading "VeloData" [level=1] [ref=e5]
+      - paragraph [ref=e6]: 防止資科被當的單車數據外掛
+    - generic [ref=e7]:
+      - button "複製訓練摘要" [ref=e8] [cursor=pointer]:
+        - img [ref=e9]
+        - generic [ref=e11]: 複製訓練摘要
+      - generic [ref=e12]:
+        - generic [ref=e13]: 友駿 陳
+        - text: 已連線 Strava
+      - button "友駿 陳" [ref=e14] [cursor=pointer]:
+        - img "友駿 陳" [ref=e15]
+        - img [ref=e17]
+  - navigation [ref=e20]:
+    - link "儀表板" [ref=e21] [cursor=pointer]:
+      - /url: /
+      - img [ref=e22]
+      - generic [ref=e24]: 儀表板
+    - link "體能分析" [ref=e25] [cursor=pointer]:
+      - /url: /analysis
+      - img [ref=e26]
+      - generic [ref=e28]: 體能分析
+    - link "賽事規劃" [ref=e29] [cursor=pointer]:
+      - /url: /racing
+      - img [ref=e30]
+      - generic [ref=e32]: 賽事規劃
+    - link "個人設定" [ref=e33] [cursor=pointer]:
+      - /url: /profile
+      - img [ref=e34]
+      - generic [ref=e36]: 個人設定
+  - generic [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - heading "Performance Management Chart" [level=2] [ref=e40]
+        - paragraph [ref=e41]: 過去 42 天體能管理趨勢
+      - generic [ref=e42]:
+        - generic "CTL 慢性訓練負荷：42 天加權平均，代表長期體能基礎" [ref=e43]: CTL 53.6
+        - generic "ATL 急性訓練負荷：7 天加權平均，代表近期疲勞程度" [ref=e44]: ATL 91.2
+        - generic "TSB 訓練壓力平衡 = CTL − ATL。正值恢復良好，負值疲勞累積中" [ref=e45]: TSB -37.6
+    - button "圖說" [ref=e49] [cursor=pointer]:
+      - img [ref=e50]
+      - generic [ref=e52]: 圖說
+  - generic [ref=e53]:
+    - generic [ref=e54]:
+      - heading "最近騎乘資料" [level=2] [ref=e55]
+      - generic [ref=e56]: "?"
+      - generic:
+        - generic:
+          - generic:
+            - paragraph: TSS（訓練壓力分數）
+            - paragraph: 這趟騎乘「讓你多累」的總量。100 分大約等於全力騎一小時的疲勞感。騎完 < 50 隔天沒問題；150+ 需要認真休息。
+          - generic:
+            - paragraph: NP（標準化功率）
+            - paragraph: 比均瓦更誠實的強度數字。市區走走停停均瓦看起來低，但 NP 會抓出你那幾腳猛踩對身體的真實傷害。NP 比均瓦高越多，代表騎乘越不穩定。
+          - generic:
+            - paragraph: IF（強度因子）
+            - paragraph: 這趟騎乘有多「硬」，以你的 FTP 為基準。0.75 以下輕鬆恢復騎、0.85–0.95 甜區訓練、1.0 以上就是在逼極限。
+    - generic [ref=e57]:
+      - generic [ref=e58]: 共 55 筆
+      - combobox [ref=e59] [cursor=pointer]:
+        - option "新到舊" [selected]
+        - option "舊到新"
+        - option "均瓦最高"
+        - option "均速最高"
+        - option "距離最遠"
+        - option "TSS 最高"
+  - generic [ref=e60]:
+    - generic [ref=e61]:
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]: 衝風櫃嘴 破PR👑
+          - generic [ref=e65]: 05/02 11:40
+        - generic [ref=e66]:
+          - generic [ref=e67]: "169.0"
+          - generic [ref=e68]: TSS
+      - generic [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e71]: 距離
+          - generic [ref=e72]: 44.3 km
+        - generic [ref=e73]:
+          - generic [ref=e74]: 時間
+          - generic [ref=e75]: 2h 18m
+        - generic [ref=e76]:
+          - generic [ref=e77]: 爬升
+          - generic [ref=e78]: 841 m
+        - generic [ref=e79]:
+          - generic [ref=e80]: 均速
+          - generic [ref=e81]: 19.2 km/h
+        - generic [ref=e82]:
+          - generic [ref=e83]: 功率表現
+          - generic [ref=e84]: 均瓦 112 W | NP 148 W
+          - generic [ref=e85]: 變異指數 (VI)：1.32
+        - generic [ref=e86]:
+          - generic [ref=e87]: 踏頻
+          - generic [ref=e88]: 68 rpm
+        - generic [ref=e89]:
+          - generic [ref=e90]: 心率
+          - generic [ref=e91]: —
+      - generic [ref=e92]: 甜區/閾值訓練 · IF 0.86
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e96]: 精英組💀
+          - generic [ref=e97]: 05/02 11:01
+        - generic [ref=e98]:
+          - generic [ref=e99]: "15.2"
+          - generic [ref=e100]: TSS
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - generic [ref=e103]: 距離
+          - generic [ref=e104]: 4.0 km
+        - generic [ref=e105]:
+          - generic [ref=e106]: 時間
+          - generic [ref=e107]: 7m
+        - generic [ref=e108]:
+          - generic [ref=e109]: 爬升
+          - generic [ref=e110]: 8 m
+        - generic [ref=e111]:
+          - generic [ref=e112]: 均速
+          - generic [ref=e113]: 33.7 km/h
+        - generic [ref=e114]:
+          - generic [ref=e115]: 功率表現
+          - generic [ref=e116]: 均瓦 178 W | NP 195 W
+          - generic [ref=e117]: 變異指數 (VI)：1.09
+        - generic [ref=e118]:
+          - generic [ref=e119]: 踏頻
+          - generic [ref=e120]: 91 rpm
+        - generic [ref=e121]:
+          - generic [ref=e122]: 心率
+          - generic [ref=e123]: —
+      - generic [ref=e124]: 全力噴發，建議休息24h · IF 1.13
+    - generic [ref=e125]:
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - generic [ref=e128]: 男子組 U17
+          - generic [ref=e129]: 05/02 09:05
+        - generic [ref=e130]:
+          - generic [ref=e131]: "45.8"
+          - generic [ref=e132]: TSS
+      - generic [ref=e133]:
+        - generic [ref=e134]:
+          - generic [ref=e135]: 距離
+          - generic [ref=e136]: 10.0 km
+        - generic [ref=e137]:
+          - generic [ref=e138]: 時間
+          - generic [ref=e139]: 18m
+        - generic [ref=e140]:
+          - generic [ref=e141]: 爬升
+          - generic [ref=e142]: 11 m
+        - generic [ref=e143]:
+          - generic [ref=e144]: 均速
+          - generic [ref=e145]: 32.6 km/h
+        - generic [ref=e146]:
+          - generic [ref=e147]: 功率表現
+          - generic [ref=e148]: 均瓦 186 W | NP 211 W
+          - generic [ref=e149]: 變異指數 (VI)：1.13
+        - generic [ref=e150]:
+          - generic [ref=e151]: 踏頻
+          - generic [ref=e152]: 93 rpm
+        - generic [ref=e153]:
+          - generic [ref=e154]: 心率
+          - generic [ref=e155]: —
+      - generic [ref=e156]: 全力噴發，建議休息24h · IF 1.22
+    - generic [ref=e157]:
+      - generic [ref=e158]:
+        - generic [ref=e159]:
+          - generic [ref=e160]: 熱身一下
+          - generic [ref=e161]: 05/02 07:24
+        - generic [ref=e162]:
+          - generic [ref=e163]: "3.1"
+          - generic [ref=e164]: TSS
+      - generic [ref=e165]:
+        - generic [ref=e166]:
+          - generic [ref=e167]: 距離
+          - generic [ref=e168]: 2.0 km
+        - generic [ref=e169]:
+          - generic [ref=e170]: 時間
+          - generic [ref=e171]: 5m
+        - generic [ref=e172]:
+          - generic [ref=e173]: 爬升
+          - generic [ref=e174]: 2 m
+        - generic [ref=e175]:
+          - generic [ref=e176]: 均速
+          - generic [ref=e177]: 23.3 km/h
+        - generic [ref=e178]:
+          - generic [ref=e179]: 功率表現
+          - generic [ref=e180]: 均瓦 99 W | NP 106 W
+          - generic [ref=e181]: 變異指數 (VI)：1.07
+        - generic [ref=e182]:
+          - generic [ref=e183]: 踏頻
+          - generic [ref=e184]: 79 rpm
+        - generic [ref=e185]:
+          - generic [ref=e186]: 心率
+          - generic [ref=e187]: —
+      - generic [ref=e188]: 恢復騎，隔天可繼續練 · IF 0.61
+    - generic [ref=e189]:
+      - generic [ref=e190]:
+        - generic [ref=e191]:
+          - generic [ref=e192]: 休閒騎小台北
+          - generic [ref=e193]: 05/01 13:17
+        - generic [ref=e194]:
+          - generic [ref=e195]: "218.2"
+          - generic [ref=e196]: TSS
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - generic [ref=e199]: 距離
+          - generic [ref=e200]: 80.6 km
+        - generic [ref=e201]:
+          - generic [ref=e202]: 時間
+          - generic [ref=e203]: 3h 41m
+        - generic [ref=e204]:
+          - generic [ref=e205]: 爬升
+          - generic [ref=e206]: 396 m
+        - generic [ref=e207]:
+          - generic [ref=e208]: 均速
+          - generic [ref=e209]: 21.8 km/h
+        - generic [ref=e210]:
+          - generic [ref=e211]: 功率表現
+          - generic [ref=e212]: 均瓦 106 W | NP 133 W
+          - generic [ref=e213]: 變異指數 (VI)：1.25
+        - generic [ref=e214]:
+          - generic [ref=e215]: 踏頻
+          - generic [ref=e216]: 71 rpm
+        - generic [ref=e217]:
+          - generic [ref=e218]: 心率
+          - generic [ref=e219]: —
+      - generic [ref=e220]: 有氧耐力訓練 · IF 0.77
+    - generic [ref=e221]:
+      - generic [ref=e222]:
+        - generic [ref=e223]:
+          - generic [ref=e224]: 比賽❤️‍🔥
+          - generic [ref=e225]: 05/01 10:42
+        - generic [ref=e226]:
+          - generic [ref=e227]: "38.3"
+          - generic [ref=e228]: TSS
+      - generic [ref=e229]:
+        - generic [ref=e230]:
+          - generic [ref=e231]: 距離
+          - generic [ref=e232]: 7.4 km
+        - generic [ref=e233]:
+          - generic [ref=e234]: 時間
+          - generic [ref=e235]: 16m
+        - generic [ref=e236]:
+          - generic [ref=e237]: 爬升
+          - generic [ref=e238]: 20 m
+        - generic [ref=e239]:
+          - generic [ref=e240]: 均速
+          - generic [ref=e241]: 27.7 km/h
+        - generic [ref=e242]:
+          - generic [ref=e243]: 功率表現
+          - generic [ref=e244]: 均瓦 175 W | NP 207 W
+          - generic [ref=e245]: 變異指數 (VI)：1.18
+        - generic [ref=e246]:
+          - generic [ref=e247]: 踏頻
+          - generic [ref=e248]: 85 rpm
+        - generic [ref=e249]:
+          - generic [ref=e250]: 心率
+          - generic [ref=e251]: —
+      - generic [ref=e252]: 全力噴發，建議休息24h · IF 1.2
+    - generic [ref=e253]:
+      - generic [ref=e254]:
+        - generic [ref=e255]:
+          - generic [ref=e256]: 暖身一下
+          - generic [ref=e257]: 05/01 10:00
+        - generic [ref=e258]:
+          - generic [ref=e259]: "9.8"
+          - generic [ref=e260]: TSS
+      - generic [ref=e261]:
+        - generic [ref=e262]:
+          - generic [ref=e263]: 距離
+          - generic [ref=e264]: 3.1 km
+        - generic [ref=e265]:
+          - generic [ref=e266]: 時間
+          - generic [ref=e267]: 8m
+        - generic [ref=e268]:
+          - generic [ref=e269]: 爬升
+          - generic [ref=e270]: 8 m
+        - generic [ref=e271]:
+          - generic [ref=e272]: 均速
+          - generic [ref=e273]: 23.0 km/h
+        - generic [ref=e274]:
+          - generic [ref=e275]: 功率表現
+          - generic [ref=e276]: 均瓦 134 W | NP 147 W
+          - generic [ref=e277]: 變異指數 (VI)：1.09
+        - generic [ref=e278]:
+          - generic [ref=e279]: 踏頻
+          - generic [ref=e280]: 69 rpm
+        - generic [ref=e281]:
+          - generic [ref=e282]: 心率
+          - generic [ref=e283]: —
+      - generic [ref=e284]: 甜區/閾值訓練 · IF 0.85
+    - generic [ref=e285]:
+      - generic [ref=e286]:
+        - generic [ref=e287]:
+          - generic [ref=e288]: 出發比賽！
+          - generic [ref=e289]: 05/01 07:25
+        - generic [ref=e290]:
+          - generic [ref=e291]: "41.9"
+          - generic [ref=e292]: TSS
+      - generic [ref=e293]:
+        - generic [ref=e294]:
+          - generic [ref=e295]: 距離
+          - generic [ref=e296]: 13.6 km
+        - generic [ref=e297]:
+          - generic [ref=e298]: 時間
+          - generic [ref=e299]: 38m
+        - generic [ref=e300]:
+          - generic [ref=e301]: 爬升
+          - generic [ref=e302]: 50 m
+        - generic [ref=e303]:
+          - generic [ref=e304]: 均速
+          - generic [ref=e305]: 21.3 km/h
+        - generic [ref=e306]:
+          - generic [ref=e307]: 功率表現
+          - generic [ref=e308]: 均瓦 124 W | NP 140 W
+          - generic [ref=e309]: 變異指數 (VI)：1.13
+        - generic [ref=e310]:
+          - generic [ref=e311]: 踏頻
+          - generic [ref=e312]: 84 rpm
+        - generic [ref=e313]:
+          - generic [ref=e314]: 心率
+          - generic [ref=e315]: —
+      - generic [ref=e316]: 有氧耐力訓練 · IF 0.81
+    - generic [ref=e317]:
+      - generic [ref=e318]:
+        - generic [ref=e319]:
+          - generic [ref=e320]: 超級累 - FTP Test
+          - generic [ref=e321]: 04/29 18:25
+        - generic [ref=e322]:
+          - generic [ref=e323]: "66.9"
+          - generic [ref=e324]: TSS
+      - generic [ref=e325]:
+        - generic [ref=e326]:
+          - generic [ref=e327]: 距離
+          - generic [ref=e328]: 23.0 km
+        - generic [ref=e329]:
+          - generic [ref=e330]: 時間
+          - generic [ref=e331]: 45m
+        - generic [ref=e332]:
+          - generic [ref=e333]: 爬升
+          - generic [ref=e334]: 118 m
+        - generic [ref=e335]:
+          - generic [ref=e336]: 均速
+          - generic [ref=e337]: 30.6 km/h
+        - generic [ref=e338]:
+          - generic [ref=e339]: 功率表現
+          - generic [ref=e340]: 均瓦 146 W | NP 163 W
+          - generic [ref=e341]: 變異指數 (VI)：1.12
+        - generic [ref=e342]:
+          - generic [ref=e343]: 踏頻
+          - generic [ref=e344]: 90 rpm
+        - generic [ref=e345]:
+          - generic [ref=e346]: 心率
+          - generic [ref=e347]: —
+      - generic [ref=e348]: 甜區/閾值訓練 · IF 0.94
+  - generic [ref=e349]:
+    - button "← 上一頁" [disabled] [ref=e350]
+    - generic [ref=e351]: 第 1 / 7 頁
+    - button "下一頁 →" [ref=e352] [cursor=pointer]

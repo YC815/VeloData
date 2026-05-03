@@ -6,6 +6,7 @@ db = SQLAlchemy()
 
 DEFAULT_FTP = 250
 DEFAULT_WEIGHT = 70.0
+DEFAULT_BIKE_WEIGHT = 8.0
 EXPORT_CACHE_TTL_MINUTES = 60
 
 
@@ -14,6 +15,7 @@ class UserProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ftp_watts = db.Column(db.Integer, nullable=False, default=DEFAULT_FTP)
     weight_kg = db.Column(db.Float, nullable=False, default=DEFAULT_WEIGHT)
+    bike_weight_kg = db.Column(db.Float, nullable=False, default=DEFAULT_BIKE_WEIGHT)
     timezone = db.Column(db.String(64), nullable=False, default='Asia/Taipei')
     export_cache = db.Column(db.Text, nullable=True)
     export_cache_at = db.Column(db.DateTime, nullable=True)
@@ -25,7 +27,12 @@ class UserProfile(db.Model):
         return age_minutes < EXPORT_CACHE_TTL_MINUTES
 
     def to_dict(self):
-        return {'ftp_watts': self.ftp_watts, 'weight_kg': self.weight_kg, 'timezone': self.timezone}
+        return {
+            'ftp_watts': self.ftp_watts,
+            'weight_kg': self.weight_kg,
+            'bike_weight_kg': self.bike_weight_kg,
+            'timezone': self.timezone,
+        }
 
 
 class RaceEvent(db.Model):
@@ -84,6 +91,7 @@ def init_db(app):
         engine = db.engine
         _migrate_add_column_if_missing(engine, 'user_profile', 'export_cache', 'TEXT')
         _migrate_add_column_if_missing(engine, 'user_profile', 'export_cache_at', 'DATETIME')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'bike_weight_kg', 'FLOAT DEFAULT 8.0')
         if not UserProfile.query.first():
             db.session.add(UserProfile(ftp_watts=DEFAULT_FTP, weight_kg=DEFAULT_WEIGHT))
             db.session.commit()

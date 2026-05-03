@@ -22,7 +22,6 @@
   "description":    "起點→終點",          // 簡短描述
   "distance_km":    52.56,               // 總距離（公里）
   "elevation_m":    2593,                // 總爬升（公尺）
-  "bike_weight_kg": 8,                   // 車重（kg），calc_subx_ftp 自動加上體重
 
   "physics": {
     "Crr":  0.004,   // 滾動阻力係數（公路：0.003-0.005）

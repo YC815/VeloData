@@ -164,11 +164,11 @@ def calc_tsb_status(tsb):
     return {'color': 'red', 'label': '過度訓練，強制休息', 'tw_class': 'bg-red-500'}
 
 
-def calc_wuling(ftp, weight_kg, tsb):
+def calc_wuling(ftp, weight_kg, tsb, bike_weight_kg=8.0):
     if not weight_kg:
         empty = {'time_display': '—', 'speed_kmh': None, 'sub_three': False, 'tsb': None}
         return {'current': empty, 'ideal': empty, 'delta_mins': 0}
-    total_mass = weight_kg + 8
+    total_mass = weight_kg + bike_weight_kg
     current_pred = WulingPredictor(ftp=ftp, weight_kg=total_mass, tsb=tsb).simulate()
     ideal_pred   = WulingPredictor(ftp=ftp, weight_kg=total_mass, tsb=15).simulate()
 
@@ -191,7 +191,7 @@ def calc_wuling(ftp, weight_kg, tsb):
     }
 
 
-def calc_wuling_subx(ftp, weight_kg, tsb):
+def calc_wuling_subx(ftp, weight_kg, tsb, bike_weight_kg=8.0):
     """計算破 3h/3.5h/4h/4.5h 所需 FTP，並回傳與當前 FTP 的落差。"""
     if not weight_kg:
         return []
@@ -204,7 +204,7 @@ def calc_wuling_subx(ftp, weight_kg, tsb):
     results = []
     w_per_kg = round(ftp / weight_kg, 2) if weight_kg else None
     for t in targets:
-        req_ftp = calc_subx_ftp(t["minutes"], weight_kg, tsb)
+        req_ftp = calc_subx_ftp(t["minutes"], weight_kg, tsb, bike_weight_kg=bike_weight_kg)
         req_wkg = round(req_ftp / weight_kg, 2) if weight_kg else None
         results.append({
             "label": t["label"],
@@ -435,6 +435,16 @@ def api_profile_put():
         except (ValueError, TypeError):
             return jsonify({'error': '體重格式錯誤'}), 400
 
+    bike_weight = data.get('bike_weight_kg')
+    if bike_weight is not None:
+        try:
+            bike_weight_float = float(bike_weight)
+            if bike_weight_float <= 0:
+                return jsonify({'error': '車重必須大於 0'}), 400
+            profile.bike_weight_kg = bike_weight_float
+        except (ValueError, TypeError):
+            return jsonify({'error': '車重格式錯誤'}), 400
+
     tz_str = data.get('timezone')
     if tz_str is not None:
         try:
@@ -642,6 +652,7 @@ def partial_racing():
 
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
+    bike_weight_kg = profile.bike_weight_kg
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         os.environ.pop('STRAVA_REFRESH_TOKEN', None)
@@ -651,8 +662,8 @@ def partial_racing():
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     tsb_status = calc_tsb_status(pmc['current_tsb'])
     ftp_progress = calc_ftp_progress(ftp, weight_kg)
-    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
-    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'])
+    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
+    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     used_timezones = _extract_used_timezones(acts_raw)
     upcoming_events = _get_upcoming_events()
 
@@ -854,6 +865,7 @@ def racing():
 
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg
+    bike_weight_kg = profile.bike_weight_kg
 
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
@@ -864,8 +876,8 @@ def racing():
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     tsb_status = calc_tsb_status(pmc['current_tsb'])
     ftp_progress = calc_ftp_progress(ftp, weight_kg)
-    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'])
-    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'])
+    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
+    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
     used_timezones = _extract_used_timezones(acts_raw)
     upcoming_events = _get_upcoming_events()
 

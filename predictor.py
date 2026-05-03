@@ -103,6 +103,7 @@ def calc_subx_ftp(
     target_minutes: float,
     weight_kg: float,
     tsb: float = 0,
+    bike_weight_kg: float = 8.0,
 ) -> int:
     """
     Binary search：求達到 target_minutes 完賽所需的最低 FTP。
@@ -110,10 +111,11 @@ def calc_subx_ftp(
     Args:
         route:          load_route() 回傳的路線 dict
         target_minutes: 目標完賽時間（分鐘）
-        weight_kg:      騎手體重（kg），自動加上 route 定義的 bike_weight_kg
+        weight_kg:      騎手體重（kg）
         tsb:            訓練壓力平衡值
+        bike_weight_kg: 車重（kg），由呼叫端傳入，預設 8.0
     """
-    total_mass = weight_kg + route.get("bike_weight_kg", 8)
+    total_mass = weight_kg + bike_weight_kg
     lo, hi = 100.0, 600.0
     for _ in range(40):
         mid = (lo + hi) / 2
