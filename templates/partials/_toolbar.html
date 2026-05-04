@@ -1,0 +1,85 @@
+<div class="flex items-center justify-between px-4 lg:px-8 py-3 border-b border-white/6">
+  <h2 id="pageTitle" class="text-sm font-semibold text-zinc-300">
+    {% if active_tab == 'dashboard' %}儀表板
+    {% elif active_tab == 'analysis' %}體能分析
+    {% elif active_tab == 'racing' %}賽事規劃
+    {% elif active_tab == 'profile' %}個人設定
+    {% else %}儀表板{% endif %}
+  </h2>
+
+  <div class="flex items-center gap-2">
+    <span id="cacheTimeLabel" class="hidden sm:block text-xs text-zinc-600 font-mono"></span>
+
+    <button
+      id="refreshDataBtn"
+      onclick="refreshActivityData()"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+             bg-zinc-800 border border-white/8
+             hover:bg-zinc-700 hover:border-white/15
+             text-zinc-400 hover:text-zinc-200
+             text-xs font-medium transition-all"
+    >
+      <svg id="refreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      <span id="refreshLabel">刷新</span>
+    </button>
+
+    <button
+      id="copyAiBtn"
+      onclick="copyForAI()"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+             bg-zinc-800 border border-white/8
+             hover:bg-zinc-700 hover:border-white/15
+             text-zinc-400 hover:text-zinc-200
+             text-xs font-medium transition-all"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+      </svg>
+      <span id="copyAiLabel">複製給 AI</span>
+    </button>
+  </div>
+</div>
+
+<script>
+function _updateCacheTimeLabel(cachedAt) {
+  var label = document.getElementById('cacheTimeLabel');
+  if (label) {
+    label.textContent = cachedAt ? cachedAt : '';
+    label.classList.toggle('hidden', !cachedAt);
+  }
+}
+
+function _getActiveTabUrl() {
+  var active = document.querySelector('.sidebar-nav-item.text-orange-400');
+  return active ? active.getAttribute('hx-get') : '/partials/dashboard';
+}
+
+function refreshActivityData() {
+  var btn = document.getElementById('refreshDataBtn');
+  var icon = document.getElementById('refreshIcon');
+  var label = document.getElementById('refreshLabel');
+  if (!btn) return;
+  btn.disabled = true;
+  label.textContent = '更新中…';
+  icon.classList.add('animate-spin');
+  fetch('/api/activities/refresh', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.cached_at) _updateCacheTimeLabel(data.cached_at);
+      htmx.ajax('GET', _getActiveTabUrl(), { target: '#content', swap: 'innerHTML' });
+    })
+    .catch(function() { label.textContent = '失敗'; })
+    .finally(function() {
+      btn.disabled = false;
+      label.textContent = '刷新';
+      icon.classList.remove('animate-spin');
+    });
+}
+
+fetch('/api/activities/cache-info')
+  .then(function(r) { return r.json(); })
+  .then(function(d) { _updateCacheTimeLabel(d.cached_at); })
+  .catch(function() {});
+</script>

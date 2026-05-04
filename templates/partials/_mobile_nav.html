@@ -1,0 +1,31 @@
+{% set nav_items = [
+  ('dashboard', '/partials/dashboard', '/',
+   'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+   '儀表板'),
+  ('analysis', '/partials/analysis', '/analysis',
+   'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4v16',
+   '體能'),
+  ('racing', '/partials/racing', '/racing',
+   'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7',
+   '賽事'),
+  ('profile', '/partials/profile', '/profile',
+   'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+   '設定'),
+] %}
+
+{% for tab_id, hx_url, push_url, icon_path, label in nav_items %}
+<button
+  hx-get="{{ hx_url }}"
+  hx-target="#content"
+  hx-push-url="{{ push_url }}"
+  hx-on:click="setActiveNav(document.querySelector('[hx-get=\'{{ hx_url }}\'].sidebar-nav-item'))"
+  data-tab="{{ tab_id }}"
+  class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-2 gap-1 transition-colors
+    {% if active_tab == tab_id %}text-orange-400{% else %}text-zinc-500{% endif %}"
+>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/>
+  </svg>
+  <span class="text-[10px] font-medium">{{ label }}</span>
+</button>
+{% endfor %}
