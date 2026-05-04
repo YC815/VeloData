@@ -29,7 +29,7 @@
           <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">FTP（瓦特）</label>
           <div class="relative">
             <input id="profileFtpInput" type="number" min="1" max="600" value="{{ ftp }}"
-              class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-12" />
+              class="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-zinc-100 font-mono text-base focus:outline-none focus:border-orange-500/60 focus:ring-1 focus:ring-orange-500/20 transition-all pr-12" />
             <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">W</span>
           </div>
           <p class="text-xs text-zinc-600 mt-1">功能臨界功率，用於 TSS / IF 計算</p>
@@ -38,7 +38,7 @@
           <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">體重（公斤）</label>
           <div class="relative">
             <input id="profileWeightInput" type="number" min="1" max="200" step="0.1" value="{{ weight_kg }}"
-              class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14" />
+              class="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-zinc-100 font-mono text-base focus:outline-none focus:border-orange-500/60 focus:ring-1 focus:ring-orange-500/20 transition-all pr-14" />
             <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">kg</span>
           </div>
           <p class="text-xs text-zinc-600 mt-1">用於 W/kg 與武嶺時間預測</p>
@@ -47,7 +47,7 @@
           <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">車重（公斤）</label>
           <div class="relative">
             <input id="profileBikeWeightInput" type="number" min="1" max="30" step="0.1" value="{{ bike_weight_kg }}"
-              class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14" />
+              class="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-zinc-100 font-mono text-base focus:outline-none focus:border-orange-500/60 focus:ring-1 focus:ring-orange-500/20 transition-all pr-14" />
             <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">kg</span>
           </div>
           <p class="text-xs text-zinc-600 mt-1">含輪組、水壺架、補給等配件，預測時系統重 = 體重 + 車重</p>
@@ -55,7 +55,7 @@
         <div>
           <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">時區</label>
           <select id="profileTimezoneSelect"
-            class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:border-orange-500 transition">
+            class="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 text-zinc-100 text-sm focus:outline-none focus:border-orange-500/60 focus:ring-1 focus:ring-orange-500/20 transition-all">
             {% if used_timezones %}
             <optgroup label="曾使用的時區">
               {% for tz in used_timezones %}
@@ -74,7 +74,10 @@
       </div>
       <div class="mt-6">
         <button id="profileSaveBtn" onclick="saveProfileSettings()"
-          class="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-semibold text-sm transition disabled:opacity-50">
+          class="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 active:bg-orange-600
+                 text-white font-semibold text-sm transition-all
+                 shadow-md shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-0.5
+                 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0">
           儲存設定
         </button>
         <div id="profileSaveMsg" class="hidden mt-3 text-center text-sm text-green-400">已儲存，重新整理後生效</div>
@@ -82,10 +85,6 @@
       </div>
     </div>
 
-    <div class="bg-zinc-900/40 border border-white/8 border-dashed rounded-2xl p-6">
-      <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">裝置設定</h3>
-      <p class="text-zinc-600 text-sm">功率計裝置設定開發中</p>
-    </div>
 
   </div>
   <script>
