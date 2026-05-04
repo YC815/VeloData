@@ -276,6 +276,17 @@ def _get_upcoming_events():
     return [r.to_dict() for r in rows]
 
 
+def _get_next_race():
+    """取得最近一筆未來賽事（不限等級），用於儀表板倒數卡片。"""
+    from datetime import date as _date
+    today = _date.today()
+    row = (RaceEvent.query
+           .filter(RaceEvent.event_date >= today)
+           .order_by(RaceEvent.event_date)
+           .first())
+    return row.to_dict() if row else None
+
+
 def enrich_activity(act, ftp):
     local_dt = datetime.fromisoformat(act.get('start_date_local', '1970-01-01T00:00:00Z').rstrip('Z'))
     utc_dt = datetime.fromisoformat(act.get('start_date', '1970-01-01T00:00:00Z').rstrip('Z'))
@@ -899,7 +910,7 @@ def index():
         timezone=profile.timezone,
         used_timezones=used_timezones,
         all_timezones=pytz.all_timezones,
-        target_race=None,
+        target_race=_get_next_race(),
         active_tab='dashboard',
     )
 
@@ -942,10 +953,8 @@ def partial_dashboard():
         timezone=profile.timezone,
         used_timezones=used_timezones,
         all_timezones=pytz.all_timezones,
-        target_race=None,
+        target_race=_get_next_race(),
     )
-
-
 @app.route('/partials/analysis')
 def partial_analysis():
     header, athlete, profile, redir = _require_strava()
