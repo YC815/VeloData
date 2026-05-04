@@ -5,6 +5,17 @@
   </div>
   <div class="flex items-center gap-3">
     <button
+      id="refreshDataBtn"
+      title="從 Strava 重新抓取最新資料"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 hover:border-orange-500/50 text-slate-300 hover:text-orange-300 text-xs font-medium transition"
+      onclick="refreshActivityData()"
+    >
+      <svg id="refreshIcon" class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      <span id="refreshLabel">刷新資料</span>
+    </button>
+    <button
       id="copyAiBtn"
       onclick="copyForAI()"
       title="複製訓練摘要給 AI"
@@ -23,9 +34,7 @@
     </div>
     <button
       id="avatarBtn"
-      onclick="openSettings()"
       class="relative group focus:outline-none"
-      title="帳號設定"
     >
       {% if athlete.profile %}
       <img
@@ -49,3 +58,47 @@
     </button>
   </div>
 </header>
+<script>
+  function _updateCacheTimeLabel(cachedAt) {
+    var btn = document.getElementById('refreshDataBtn');
+    if (btn) btn.title = cachedAt ? '資料時間 ' + cachedAt + '（點擊重新抓取）' : '從 Strava 重新抓取最新資料';
+  }
+
+  function _getActiveTabUrl() {
+    var active = document.querySelector('#navTabs .nav-tab.active');
+    return active ? active.getAttribute('hx-get') : '/partials/dashboard';
+  }
+
+  function refreshActivityData() {
+    var btn = document.getElementById('refreshDataBtn');
+    var icon = document.getElementById('refreshIcon');
+    var label = document.getElementById('refreshLabel');
+    if (!btn) return;
+
+    btn.disabled = true;
+    label.textContent = '更新中…';
+    icon.classList.add('animate-spin');
+
+    fetch('/api/activities/refresh', { method: 'POST' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.cached_at) _updateCacheTimeLabel(data.cached_at);
+        var url = _getActiveTabUrl();
+        htmx.ajax('GET', url, { target: '#content', swap: 'innerHTML' });
+      })
+      .catch(function() {
+        label.textContent = '刷新失敗';
+      })
+      .finally(function() {
+        btn.disabled = false;
+        label.textContent = '刷新資料';
+        icon.classList.remove('animate-spin');
+      });
+  }
+
+  // 頁面載入時取得目前緩存時間
+  fetch('/api/activities/cache-info')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { _updateCacheTimeLabel(d.cached_at); })
+    .catch(function() {});
+</script>

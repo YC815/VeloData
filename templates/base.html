@@ -10,13 +10,11 @@
   <body class="bg-slate-950 text-slate-100 font-sans">
     <div class="max-w-4xl mx-auto py-10 px-6">
       {% include 'partials/_header.html' %}
-      {% include 'partials/_settings_modal.html' %}
       {% include 'partials/_nav_tabs.html' %}
       <main id="content">
         {% block content %}{% endblock %}
       </main>
     </div>
-    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
     <script src="{{ url_for('static', filename='js/copy_for_ai.js') }}"></script>
     {% block scripts %}{% endblock %}
     <script>
