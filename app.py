@@ -15,8 +15,7 @@ load_dotenv()
 app = Flask(__name__)
 init_db(app)
 
-# In-memory compute cache: key=(activities_cache_at_iso, ftp, weight, bike_weight)
-# value={'pmc': ..., 'weekly_stats': ..., 'wuling': ..., 'wuling_subx': ..., 'benchmarks': ...}
+# Process-level L1 cache (per-worker), DB is L2 shared across workers
 _COMPUTE_CACHE: dict = {}
 
 STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize"
@@ -404,31 +403,50 @@ def _require_strava():
 
 
 def _get_computed(acts_raw, profile) -> dict:
-    """取得或計算 PMC、weekly stats、wuling、benchmarks，結果存 in-memory 快取。"""
+    """取得或計算 PMC、weekly stats、wuling、benchmarks。
+    L1: process-level dict（同 worker 內秒級命中）
+    L2: DB benchmark cache（跨 worker 共享，60 分鐘 TTL）
+    """
+    import json as _json
     ftp = profile.ftp_watts
     weight_kg = profile.weight_kg or DEFAULT_WEIGHT
     bike_weight_kg = profile.bike_weight_kg or DEFAULT_BIKE_WEIGHT
     cache_ts = profile.activities_cache_at.isoformat() if profile.activities_cache_at else ''
-    key = (cache_ts, ftp, weight_kg, bike_weight_kg, profile.timezone)
+    l1_key = (cache_ts, ftp, weight_kg, bike_weight_kg, profile.timezone)
 
-    if key in _COMPUTE_CACHE:
-        return _COMPUTE_CACHE[key]
+    if l1_key in _COMPUTE_CACHE:
+        return _COMPUTE_CACHE[l1_key]
 
+    # PMC、weekly stats、wuling_subx 快速計算（<10ms），不需要 DB cache
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
     tsb = pmc['current_tsb']
+
+    # benchmark_cache_key 包含 TSB（每日變動）
+    bench_key = f"{ftp}:{weight_kg}:{bike_weight_kg}:{round(tsb, 1)}"
+
+    wuling = calc_wuling(ftp, weight_kg, tsb, bike_weight_kg)
+
+    if profile.is_benchmark_cache_valid(bench_key):
+        benchmarks = _json.loads(profile.benchmark_cache)
+    else:
+        benchmarks = calc_all_routes_benchmark(ftp, weight_kg, tsb, bike_weight_kg)
+        profile.benchmark_cache = _json.dumps(benchmarks, ensure_ascii=False)
+        profile.benchmark_cache_key = bench_key
+        profile.benchmark_cache_at = datetime.utcnow()
+        db.session.commit()
+
     result = {
         'pmc': pmc,
         'weekly_stats': _calc_weekly_stats(acts_raw, ftp, profile),
         'tsb_status': calc_tsb_status(tsb),
-        'wuling': calc_wuling(ftp, weight_kg, tsb, bike_weight_kg),
+        'wuling': wuling,
         'wuling_subx': calc_wuling_subx(ftp, weight_kg, tsb, bike_weight_kg),
-        'benchmarks': calc_all_routes_benchmark(ftp, weight_kg, tsb, bike_weight_kg),
+        'benchmarks': benchmarks,
         'used_timezones': _extract_used_timezones(acts_raw),
     }
 
-    # 只保留最近一筆，防止 memory 無限成長
     _COMPUTE_CACHE.clear()
-    _COMPUTE_CACHE[key] = result
+    _COMPUTE_CACHE[l1_key] = result
     return result
 
 

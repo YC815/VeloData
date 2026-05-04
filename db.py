@@ -14,6 +14,7 @@ EXPORT_CACHE_TTL_MINUTES = 60
 ACTIVITIES_CACHE_TTL_MINUTES = 120
 ATHLETE_CACHE_TTL_MINUTES = 60
 ACCESS_TOKEN_BUFFER_SECONDS = 300
+BENCHMARK_CACHE_TTL_MINUTES = 60
 
 
 class UserProfile(db.Model):
@@ -34,6 +35,16 @@ class UserProfile(db.Model):
     strava_access_token_expires_at = db.Column(db.Integer, nullable=True)
     athlete_cache = db.Column(db.Text, nullable=True)
     athlete_cache_at = db.Column(db.DateTime, nullable=True)
+    benchmark_cache = db.Column(db.Text, nullable=True)
+    benchmark_cache_key = db.Column(db.String(128), nullable=True)
+    benchmark_cache_at = db.Column(db.DateTime, nullable=True)
+
+    def is_benchmark_cache_valid(self, key: str) -> bool:
+        if (not self.benchmark_cache or not self.benchmark_cache_at
+                or self.benchmark_cache_key != key):
+            return False
+        age_minutes = (datetime.utcnow() - self.benchmark_cache_at).total_seconds() / 60
+        return age_minutes < BENCHMARK_CACHE_TTL_MINUTES
 
     def is_access_token_valid(self) -> bool:
         import time
@@ -147,6 +158,9 @@ def init_db(app):
         _migrate_add_column_if_missing(engine, 'user_profile', 'strava_access_token_expires_at', 'INTEGER')
         _migrate_add_column_if_missing(engine, 'user_profile', 'athlete_cache', 'TEXT')
         _migrate_add_column_if_missing(engine, 'user_profile', 'athlete_cache_at', 'DATETIME')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'benchmark_cache', 'TEXT')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'benchmark_cache_key', 'VARCHAR(128)')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'benchmark_cache_at', 'DATETIME')
         if not UserProfile.query.first():
             db.session.add(UserProfile(ftp_watts=DEFAULT_FTP, weight_kg=DEFAULT_WEIGHT))
             db.session.commit()
