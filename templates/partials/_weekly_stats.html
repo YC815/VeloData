@@ -1,33 +1,37 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-  <div class="bg-zinc-900 p-6 rounded-2xl border border-white/8 shadow-xl relative">
+  <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 hover:border-white/15 transition-colors relative">
     <div class="absolute top-4 right-4 group">
-      <div class="w-5 h-5 rounded-full bg-zinc-700 border border-white/15 flex items-center justify-center cursor-help text-zinc-400 text-xs font-bold hover:bg-zinc-600 hover:text-zinc-200 transition-colors">?</div>
-      <div class="absolute right-0 top-7 w-64 bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+      <div class="w-5 h-5 rounded-full bg-zinc-700 border border-white/10 flex items-center justify-center cursor-help text-zinc-400 text-xs font-bold hover:bg-zinc-600 hover:text-zinc-200 transition-colors">?</div>
+      <div class="absolute right-0 top-7 w-64 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl shadow-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
         <p class="font-semibold text-zinc-100 mb-2">TSS（Training Stress Score）</p>
         <p>反映本週累積的訓練壓力。數值越高代表身體承受的負荷越大，需要更多恢復時間。</p>
-        <div class="mt-2 pt-2 border-t border-white/10 space-y-1">
-          <p><span class="text-green-400 font-medium">&lt; 150</span>　低負荷，恢復快</p>
-          <p><span class="text-yellow-400 font-medium">150–300</span>　中等，隔天可訓練</p>
-          <p><span class="text-orange-400 font-medium">300–450</span>　高負荷，需充分休息</p>
-          <p><span class="text-red-400 font-medium">&gt; 450</span>　極高，注意過度訓練</p>
+        <div class="mt-2 pt-2 border-t border-white/8 space-y-1">
+          <p><span class="text-emerald-400 font-medium">&lt; 150</span>　低負荷，恢復快</p>
+          <p><span class="text-amber-400 font-medium">150–300</span>　中等，隔天可訓練</p>
+          <p><span class="text-orange-500 font-medium">300–450</span>　高負荷，需充分休息</p>
+          <p><span class="text-rose-400 font-medium">&gt; 450</span>　極高，注意過度訓練</p>
         </div>
       </div>
     </div>
     <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">本週 TSS</h3>
     {% if weekly_tss > 0 %}
-    <p class="text-3xl font-bold text-blue-400">{{ weekly_tss }}</p>
+    <p class="text-4xl font-black font-mono text-zinc-100 tracking-tight">{{ weekly_tss }}</p>
     <p class="text-xs text-zinc-500 mt-1">FTP {{ ftp }} W 計算</p>
     {% else %}
-    <p class="text-3xl font-bold text-zinc-600">—</p>
+    <p class="text-4xl font-black font-mono text-zinc-700 tracking-tight">—</p>
     <p class="text-xs text-zinc-500 mt-1">需功率計資料</p>
     {% endif %}
   </div>
-  <div class="bg-zinc-900 p-6 rounded-2xl border border-white/8 shadow-xl">
+
+  <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 hover:border-white/15 transition-colors">
     <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">本週距離</h3>
-    <p class="text-3xl font-bold text-green-400">{{ weekly_km }} <span class="text-lg font-normal text-zinc-400">km</span></p>
+    <p class="text-4xl font-black font-mono text-zinc-100 tracking-tight">
+      {{ weekly_km }}<span class="text-sm font-normal text-zinc-500 ml-1">km</span>
+    </p>
   </div>
-  <div class="bg-zinc-900 p-6 rounded-2xl border border-white/8 shadow-xl">
+
+  <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 hover:border-white/15 transition-colors">
     <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">本週騎乘時間</h3>
-    <p class="text-3xl font-bold text-orange-400">{{ weekly_time }}</p>
+    <p class="text-4xl font-black font-mono text-zinc-100 tracking-tight">{{ weekly_time }}</p>
   </div>
 </div>
