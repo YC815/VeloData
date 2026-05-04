@@ -12,13 +12,16 @@ from math import ceil
 from typing import Any
 
 _ROUTES_DIR = os.path.join(os.path.dirname(__file__), "routes")
+_ROUTE_FILE_CACHE: dict[str, dict] = {}
 
 
 def load_route(route_id: str) -> dict[str, Any]:
     """從 routes/<route_id>.json 載入路線定義。"""
-    path = os.path.join(_ROUTES_DIR, f"{route_id}.json")
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+    if route_id not in _ROUTE_FILE_CACHE:
+        path = os.path.join(_ROUTES_DIR, f"{route_id}.json")
+        with open(path, encoding="utf-8") as f:
+            _ROUTE_FILE_CACHE[route_id] = json.load(f)
+    return _ROUTE_FILE_CACHE[route_id]
 
 
 def list_routes() -> list[dict[str, str]]:
@@ -82,7 +85,7 @@ class RoutePredictor:
         g = 9.81
         p_wheel = power * (1 - self.loss)
         lo, hi = 0.0, 20.0
-        for _ in range(20):
+        for _ in range(12):
             v = (lo + hi) / 2
             p_req = v * (self.weight * g * (grade + self.Crr)) + 0.5 * self.rho * self.CdA * v ** 3
             if p_req < p_wheel:
@@ -146,7 +149,7 @@ def calc_subx_ftp(
     """
     total_mass = weight_kg + bike_weight_kg
     lo, hi = 100.0, 600.0
-    for _ in range(20):
+    for _ in range(12):
         mid = (lo + hi) / 2
         pred = RoutePredictor(route=route, ftp=mid, weight_kg=total_mass, tsb=tsb).simulate()
         if pred["total_minutes"] <= target_minutes:

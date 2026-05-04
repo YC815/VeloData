@@ -422,7 +422,7 @@ def _get_computed(acts_raw, profile) -> dict:
     tsb = pmc['current_tsb']
 
     # benchmark_cache_key 包含 TSB（每日變動）
-    bench_key = f"{ftp}:{weight_kg}:{bike_weight_kg}:{round(tsb, 1)}"
+    bench_key = f"{ftp}:{weight_kg}:{bike_weight_kg}:{round(tsb)}"
 
     wuling = calc_wuling(ftp, weight_kg, tsb, bike_weight_kg)
 
@@ -1286,12 +1286,7 @@ def racing():
         _clear_refresh_token()
         return redirect(url_for('auth'))
 
-    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
-    tsb_status = calc_tsb_status(pmc['current_tsb'])
-    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
-    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
-    all_benchmarks = calc_all_routes_benchmark(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
-    used_timezones = _extract_used_timezones(acts_raw)
+    computed = _get_computed(acts_raw, profile)
     upcoming_events = _get_upcoming_events()
 
     return render_template(
@@ -1299,14 +1294,14 @@ def racing():
         athlete=athlete,
         ftp=ftp,
         weight_kg=weight_kg,
-        pmc=pmc,
-        tsb_status=tsb_status,
-        wuling=wuling,
-        wuling_subx=wuling_subx,
-        all_benchmarks=all_benchmarks,
+        pmc=computed['pmc'],
+        tsb_status=computed['tsb_status'],
+        wuling=computed['wuling'],
+        wuling_subx=computed['wuling_subx'],
+        all_benchmarks=computed['benchmarks'],
         upcoming_events=upcoming_events,
         timezone=profile.timezone,
-        used_timezones=used_timezones,
+        used_timezones=computed['used_timezones'],
         all_timezones=pytz.all_timezones,
         active_tab='racing',
     )
