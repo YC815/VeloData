@@ -32,30 +32,21 @@
       </div>
       <span class="text-xs text-green-400">已連線 Strava</span>
     </div>
-    <button
-      id="avatarBtn"
-      class="relative group focus:outline-none"
-    >
+    <div id="avatarBtn" class="relative">
       {% if athlete.profile %}
       <img
         src="{{ athlete.profile }}"
         alt="{{ athlete.firstname }} {{ athlete.lastname }}"
-        class="w-10 h-10 rounded-full border-2 border-orange-500 object-cover transition group-hover:border-orange-300 group-hover:scale-105"
+        class="w-10 h-10 rounded-full border-2 border-orange-500 object-cover"
       />
       {% else %}
-      <div class="w-10 h-10 rounded-full border-2 border-orange-500 bg-slate-800 flex items-center justify-center transition group-hover:border-orange-300">
+      <div class="w-10 h-10 rounded-full border-2 border-orange-500 bg-slate-800 flex items-center justify-center">
         <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
         </svg>
       </div>
       {% endif %}
-      <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-slate-900 rounded-full flex items-center justify-center">
-        <svg class="w-2.5 h-2.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-      </span>
-    </button>
+    </div>
   </div>
 </header>
 <script>
