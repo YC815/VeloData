@@ -1,36 +1,58 @@
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-  <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 hover:border-white/15 transition-colors relative">
-    <div class="absolute top-4 right-4 group">
-      <div class="w-5 h-5 rounded-full bg-zinc-700 border border-white/10 flex items-center justify-center cursor-help text-zinc-400 text-xs font-bold hover:bg-zinc-600 hover:text-zinc-200 transition-colors">?</div>
-      <div class="absolute right-0 top-7 w-64 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl shadow-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-        <p class="font-semibold text-zinc-100 mb-2">TSS（Training Stress Score）</p>
-        <p>反映本週累積的訓練壓力。數值越高代表身體承受的負荷越大，需要更多恢復時間。</p>
-        <div class="mt-2 pt-2 border-t border-white/8 space-y-1">
-          <p><span class="text-emerald-400 font-medium">&lt; 150</span>　低負荷，恢復快</p>
-          <p><span class="text-amber-400 font-medium">150–300</span>　中等，隔天可訓練</p>
-          <p><span class="text-orange-500 font-medium">300–450</span>　高負荷，需充分休息</p>
-          <p><span class="text-rose-400 font-medium">&gt; 450</span>　極高，注意過度訓練</p>
+<div class="bg-zinc-900 rounded-2xl border border-white/8 mb-6">
+
+  <!-- Section header -->
+  <div class="px-5 pt-4 pb-3 border-b border-white/6">
+    <h3 class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">本週訓練</h3>
+  </div>
+
+  <!-- 三欄統計 -->
+  <div class="grid grid-cols-3 divide-x divide-white/6">
+
+    <!-- TSS -->
+    <div class="px-5 py-4 relative group">
+      {% if weekly_tss > 0 %}
+      <p class="text-4xl font-black font-mono tracking-tight leading-none
+        {% if weekly_tss < 150 %}text-emerald-400
+        {% elif weekly_tss < 300 %}text-zinc-100
+        {% elif weekly_tss < 450 %}text-amber-400
+        {% else %}text-rose-400{% endif %}">
+        {{ weekly_tss }}
+      </p>
+      {% else %}
+      <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-700">—</p>
+      {% endif %}
+      <div class="flex items-center gap-1.5 mt-2">
+        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">TSS</p>
+        <!-- Tooltip trigger -->
+        <div class="relative">
+          <div class="w-3.5 h-3.5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center cursor-help text-zinc-600 text-[9px] font-bold hover:border-white/20 hover:text-zinc-400 transition-colors">?</div>
+          <div class="absolute left-0 top-5 w-60 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl shadow-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+            <p class="font-semibold text-zinc-100 mb-2">Training Stress Score</p>
+            <p class="text-zinc-400 mb-2">本週累積訓練壓力，FTP {{ ftp }} W 計算。</p>
+            <div class="space-y-1 border-t border-white/8 pt-2">
+              <p><span class="text-emerald-400 font-mono">&lt; 150</span>　低負荷</p>
+              <p><span class="text-zinc-100 font-mono">150–300</span>　中等</p>
+              <p><span class="text-amber-400 font-mono">300–450</span>　高負荷</p>
+              <p><span class="text-rose-400 font-mono">&gt; 450</span>　極高</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">本週 TSS</h3>
-    {% if weekly_tss > 0 %}
-    <p class="text-4xl font-black font-mono text-zinc-100 tracking-tight">{{ weekly_tss }}</p>
-    <p class="text-xs text-zinc-500 mt-1">FTP {{ ftp }} W 計算</p>
-    {% else %}
-    <p class="text-4xl font-black font-mono text-zinc-700 tracking-tight">—</p>
-    {% endif %}
-  </div>
 
-  <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 hover:border-white/15 transition-colors">
-    <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">本週距離</h3>
-    <p class="text-4xl font-black font-mono text-zinc-100 tracking-tight">
-      {{ weekly_km }}<span class="text-sm font-normal text-zinc-500 ml-1">km</span>
-    </p>
-  </div>
+    <!-- 距離 -->
+    <div class="px-5 py-4">
+      <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-100">
+        {{ weekly_km }}
+      </p>
+      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">距離 <span class="normal-case not-italic font-normal text-zinc-600">km</span></p>
+    </div>
 
-  <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 hover:border-white/15 transition-colors">
-    <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">本週騎乘時間</h3>
-    <p class="text-4xl font-black font-mono text-zinc-100 tracking-tight">{{ weekly_time }}</p>
+    <!-- 騎乘時間 -->
+    <div class="px-5 py-4">
+      <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-100">{{ weekly_time }}</p>
+      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">騎乘時間</p>
+    </div>
+
   </div>
 </div>
