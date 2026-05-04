@@ -2,33 +2,57 @@
 <html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VeloData | 連結 Strava</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-zinc-950 text-zinc-100 font-sans flex items-center justify-center min-h-screen">
-    <div class="text-center px-6">
-      <h1 class="text-5xl font-black text-orange-500 tracking-tighter mb-2">VeloData</h1>
-      <p class="text-zinc-400 mb-10">防止資科被當的單車數據外掛</p>
+
+    <!-- 背景 grid 裝飾 -->
+    <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none"></div>
+
+    <div class="relative text-center px-6 max-w-sm w-full">
+
+      <!-- Logo -->
+      <div class="mb-8">
+        <h1 class="text-6xl font-black text-orange-500 tracking-tighter mb-2 leading-none">VeloData</h1>
+        <p class="text-zinc-500 text-sm">單車訓練數據監控</p>
+      </div>
+
+      <!-- 特色卡 -->
+      <div class="grid grid-cols-3 gap-3 mb-8 text-center">
+        <div class="bg-zinc-900 border border-white/8 rounded-xl p-3">
+          <p class="text-cyan-400 font-black text-xl font-mono leading-none">CTL</p>
+          <p class="text-zinc-600 text-[10px] mt-1">體能追蹤</p>
+        </div>
+        <div class="bg-zinc-900 border border-white/8 rounded-xl p-3">
+          <p class="text-orange-500 font-black text-xl font-mono leading-none">TSS</p>
+          <p class="text-zinc-600 text-[10px] mt-1">訓練壓力</p>
+        </div>
+        <div class="bg-zinc-900 border border-white/8 rounded-xl p-3">
+          <p class="text-emerald-400 font-black text-xl font-mono leading-none">FTP</p>
+          <p class="text-zinc-600 text-[10px] mt-1">功率估算</p>
+        </div>
+      </div>
 
       {% if error %}
-      <div class="bg-red-950/60 border border-red-800/50 text-red-300 text-sm rounded-xl px-5 py-3 mb-6">
+      <div class="bg-rose-950/60 border border-rose-800/50 text-rose-300 text-sm rounded-xl px-5 py-3 mb-5">
         {{ error }}
       </div>
       {% endif %}
 
-      <a
-        href="/auth"
-        class="inline-flex items-center gap-3 bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-white font-bold px-8 py-4 rounded-2xl text-lg transition"
-      >
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+      <a href="/auth"
+        class="flex items-center justify-center gap-3
+               bg-orange-500 hover:bg-orange-400 active:bg-orange-600
+               text-white font-bold px-8 py-3.5 rounded-xl text-base
+               transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-0.5">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
           <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.172"/>
         </svg>
         連結 Strava 帳號
       </a>
 
-      <p class="text-zinc-600 text-xs mt-6">
-        授權後 refresh token 會自動存入 .env，下次開啟不需重新登入。
-      </p>
+      <p class="text-zinc-700 text-xs mt-5">授權後 refresh token 自動存入 .env</p>
     </div>
   </body>
 </html>
