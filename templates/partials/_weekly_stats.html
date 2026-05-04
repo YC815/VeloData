@@ -2,7 +2,7 @@
 
   <!-- Section header -->
   <div class="px-5 pt-4 pb-3 border-b border-white/6">
-    <h3 class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">本週訓練</h3>
+    <h3 class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">本週訓練</h3>
   </div>
 
   <!-- 三欄統計 -->
@@ -19,16 +19,16 @@
         {{ weekly_tss }}
       </p>
       {% else %}
-      <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-700">—</p>
+      <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-600">—</p>
       {% endif %}
       <div class="flex items-center gap-1.5 mt-2">
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">TSS</p>
+        <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">TSS</p>
         <!-- Tooltip trigger -->
         <div class="relative">
-          <div class="w-3.5 h-3.5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center cursor-help text-zinc-600 text-[9px] font-bold hover:border-white/20 hover:text-zinc-400 transition-colors">?</div>
+          <div class="w-3.5 h-3.5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center cursor-help text-zinc-500 text-[9px] font-bold hover:border-white/20 hover:text-zinc-300 transition-colors">?</div>
           <div class="absolute left-0 top-5 w-60 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl shadow-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
             <p class="font-semibold text-zinc-100 mb-2">Training Stress Score</p>
-            <p class="text-zinc-400 mb-2">本週累積訓練壓力，FTP {{ ftp }} W 計算。</p>
+            <p class="text-zinc-300 mb-2">本週累積訓練壓力，FTP {{ ftp }} W 計算。</p>
             <div class="space-y-1 border-t border-white/8 pt-2">
               <p><span class="text-emerald-400 font-mono">&lt; 150</span>　低負荷</p>
               <p><span class="text-zinc-100 font-mono">150–300</span>　中等</p>
@@ -45,13 +45,13 @@
       <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-100">
         {{ weekly_km }}
       </p>
-      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">距離 <span class="normal-case not-italic font-normal text-zinc-600">km</span></p>
+      <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mt-2">距離 <span class="normal-case not-italic font-normal text-zinc-500">km</span></p>
     </div>
 
     <!-- 騎乘時間 -->
     <div class="px-5 py-4">
       <p class="text-4xl font-black font-mono tracking-tight leading-none text-zinc-100">{{ weekly_time }}</p>
-      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">騎乘時間</p>
+      <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mt-2">騎乘時間</p>
     </div>
 
   </div>

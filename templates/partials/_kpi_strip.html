@@ -2,7 +2,7 @@
 
   <!-- Training Status -->
   <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 shadow-xl">
-    <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-3">訓練狀態</h3>
+    <h3 class="text-zinc-300 text-xs uppercase tracking-widest mb-3">訓練狀態</h3>
     <div class="flex items-center gap-2 mb-2">
       <div class="w-3 h-3 rounded-full {{ tsb_status.tw_class }} flex-shrink-0"></div>
       <span class="text-2xl font-black font-mono
@@ -12,9 +12,9 @@
         {% else %}text-red-400{% endif %}">
         {% if pmc.current_tsb > 0 %}+{% endif %}{{ pmc.current_tsb }}
       </span>
-      <span class="text-xs text-zinc-500">TSB</span>
+      <span class="text-xs text-zinc-400">TSB</span>
     </div>
-    <p class="text-xs text-zinc-400 mb-4">{{ tsb_status.label }}</p>
+    <p class="text-xs text-zinc-300 mb-4">{{ tsb_status.label }}</p>
     <div class="flex gap-2 flex-wrap">
       <span class="bg-blue-900/40 border border-blue-800/50 text-blue-300 text-xs px-2 py-0.5 rounded-full font-mono">
         CTL {{ pmc.current_ctl }}
@@ -27,12 +27,12 @@
 
   <!-- Wuling Dual Prediction -->
   <div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 shadow-xl flex flex-col">
-    <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-1">西進武嶺 預測時間</h3>
-    <p class="text-xs text-zinc-600 mb-3">地理中心碑→武嶺 52.6km · 2593m ↑</p>
+    <h3 class="text-zinc-300 text-xs uppercase tracking-widest mb-1">西進武嶺 預測時間</h3>
+    <p class="text-xs text-zinc-500 mb-3">地理中心碑→武嶺 52.6km · 2593m ↑</p>
 
     <div class="grid grid-cols-2 divide-x divide-white/8 flex-1">
       <div class="pr-3">
-        <p class="text-xs text-zinc-500 mb-1">當下狀態</p>
+        <p class="text-xs text-zinc-400 mb-1">當下狀態</p>
         <span class="text-xs font-mono
           {% if wuling.current.tsb is not none and wuling.current.tsb > 0 %}text-green-500
           {% elif wuling.current.tsb is not none and wuling.current.tsb > -10 %}text-yellow-500
@@ -51,12 +51,12 @@
           {% endif %}
         </div>
         {% if wuling.current.speed_kmh %}
-        <p class="text-xs text-zinc-500 mt-1">{{ wuling.current.speed_kmh }} km/h</p>
+        <p class="text-xs text-zinc-400 mt-1">{{ wuling.current.speed_kmh }} km/h</p>
         {% endif %}
       </div>
 
       <div class="pl-3">
-        <p class="text-xs text-zinc-500 mb-1">休息 7 天後</p>
+        <p class="text-xs text-zinc-400 mb-1">休息 7 天後</p>
         <span class="text-xs font-mono text-green-500">TSB +15</span>
         <div class="mt-1">
           <span class="text-xl font-black font-mono
@@ -70,7 +70,7 @@
           {% endif %}
         </div>
         {% if wuling.ideal.speed_kmh %}
-        <p class="text-xs text-zinc-500 mt-1">{{ wuling.ideal.speed_kmh }} km/h</p>
+        <p class="text-xs text-zinc-400 mt-1">{{ wuling.ideal.speed_kmh }} km/h</p>
         {% endif %}
       </div>
     </div>

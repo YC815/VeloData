@@ -67,25 +67,25 @@ function _showState(state) {
 function _renderValuesB(data) {
   const deltaColor = data.delta > 0 ? 'text-emerald-400'
     : data.delta < 0 ? 'text-rose-400'
-    : 'text-zinc-400';
+    : 'text-zinc-300';
   const deltaPrefix = data.delta > 0 ? '+' : '';
 
   document.getElementById('ftpValuesSection').innerHTML = `
     <div class="grid grid-cols-3 divide-x divide-white/6">
       <div class="px-5 py-4 text-center">
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mb-2">目前</p>
-        <p class="text-3xl font-black font-mono text-zinc-400 leading-none">${data.ftp_current ?? '—'}</p>
-        <p class="text-[10px] text-zinc-600 font-mono mt-1.5">W</p>
+        <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mb-2">目前</p>
+        <p class="text-3xl font-black font-mono text-zinc-300 leading-none">${data.ftp_current ?? '—'}</p>
+        <p class="text-[10px] text-zinc-500 font-mono mt-1.5">W</p>
       </div>
       <div class="px-5 py-4 text-center">
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mb-2">建議</p>
+        <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mb-2">建議</p>
         <p class="text-3xl font-black font-mono text-zinc-100 leading-none">${data.ftp_final ?? '—'}</p>
-        <p class="text-[10px] text-zinc-600 font-mono mt-1.5">W</p>
+        <p class="text-[10px] text-zinc-500 font-mono mt-1.5">W</p>
       </div>
       <div class="px-5 py-4 text-center">
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mb-2">差值</p>
+        <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mb-2">差值</p>
         <p class="text-3xl font-black font-mono ${deltaColor} leading-none">${deltaPrefix}${data.delta ?? '—'}</p>
-        <p class="text-[10px] text-zinc-600 font-mono mt-1.5">W</p>
+        <p class="text-[10px] text-zinc-500 font-mono mt-1.5">W</p>
       </div>
     </div>`;
 }
@@ -96,9 +96,9 @@ function _renderValuesC(data) {
       <div>
         <div class="flex items-baseline gap-2">
           <span class="text-5xl font-black font-mono text-zinc-100 leading-none">${data.ftp_current ?? '—'}</span>
-          <span class="text-sm text-zinc-500 font-mono">W</span>
+          <span class="text-sm text-zinc-400 font-mono">W</span>
         </div>
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-1.5">目前 FTP</p>
+        <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mt-1.5">目前 FTP</p>
       </div>
       <span class="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full font-medium shrink-0">
         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -114,18 +114,18 @@ function _renderValuesA(currentFtp) {
     <div class="px-6 py-6">
       <div class="flex items-baseline gap-2 mb-1.5">
         <span class="text-5xl font-black font-mono text-zinc-100">${currentFtp ?? '—'}</span>
-        <span class="text-sm text-zinc-500 font-mono">W</span>
+        <span class="text-sm text-zinc-400 font-mono">W</span>
       </div>
-      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">目前 FTP</p>
-      <p class="text-xs text-zinc-600 mt-3 leading-relaxed">分析近 90 天功率資料，推算更準確的 FTP</p>
+      <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">目前 FTP</p>
+      <p class="text-xs text-zinc-500 mt-3 leading-relaxed">分析近 90 天功率資料，推算更準確的 FTP</p>
     </div>`;
 }
 
 function _renderValuesNoData() {
   document.getElementById('ftpValuesSection').innerHTML = `
     <div class="px-6 py-6 text-center">
-      <p class="text-sm text-zinc-500">90 天內無足夠功率資料，無法估算 FTP。</p>
-      <p class="text-xs text-zinc-600 mt-1">需要有功率計的 15–40 分鐘騎乘記錄。</p>
+      <p class="text-sm text-zinc-400">90 天內無足夠功率資料，無法估算 FTP。</p>
+      <p class="text-xs text-zinc-500 mt-1">需要有功率計的 15–40 分鐘騎乘記錄。</p>
     </div>`;
 }
 

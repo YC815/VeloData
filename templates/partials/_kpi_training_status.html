@@ -9,7 +9,7 @@
 
   <!-- Header：標題 + 狀態 chip -->
   <div class="flex items-center justify-between px-5 pt-4 pb-0">
-    <h3 class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">訓練狀態</h3>
+    <h3 class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">訓練狀態</h3>
     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono border
       {% if pmc.current_tsb >= 5 %}text-emerald-400 bg-emerald-500/10 border-emerald-500/20
       {% elif pmc.current_tsb >= 0 %}text-zinc-300 bg-zinc-700/40 border-zinc-600/30
@@ -29,18 +29,18 @@
         {% else %}text-rose-400{% endif %}">
         {% if pmc.current_tsb > 0 %}+{% endif %}{{ pmc.current_tsb }}
       </span>
-      <span class="text-sm text-zinc-500 font-mono mb-1">TSB</span>
+      <span class="text-sm text-zinc-400 font-mono mb-1">TSB</span>
     </div>
   </div>
 
   <!-- CTL / ATL 底部兩欄 -->
   <div class="grid grid-cols-2 divide-x divide-white/6 border-t border-white/6">
     <div class="px-5 py-3">
-      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mb-1">體能 CTL</p>
+      <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mb-1">體能 CTL</p>
       <p class="text-xl font-black font-mono text-cyan-400 leading-none">{{ pmc.current_ctl }}</p>
     </div>
     <div class="px-5 py-3">
-      <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mb-1">疲勞 ATL</p>
+      <p class="text-[10px] text-zinc-400 uppercase tracking-wider font-mono mb-1">疲勞 ATL</p>
       <p class="text-xl font-black font-mono text-orange-500 leading-none">{{ pmc.current_atl }}</p>
     </div>
   </div>

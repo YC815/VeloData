@@ -21,7 +21,7 @@
   hx-on:click="setActiveNav(document.querySelector('[hx-get=\'{{ hx_url }}\'].sidebar-nav-item'))"
   data-tab="{{ tab_id }}"
   class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-2 gap-1 transition-colors
-    {% if active_tab == tab_id %}text-orange-400{% else %}text-zinc-500{% endif %}"
+    {% if active_tab == tab_id %}text-orange-400{% else %}text-zinc-400{% endif %}"
 >
   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
     <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/>

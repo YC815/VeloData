@@ -13,16 +13,16 @@
       {% elif event.days_until <= 30 %}
         <span class="text-[10px] font-mono text-amber-400">{{ event.days_until }}天後</span>
       {% else %}
-        <span class="text-[10px] font-mono text-zinc-500">{{ event.days_until }}天後</span>
+        <span class="text-[10px] font-mono text-zinc-400">{{ event.days_until }}天後</span>
       {% endif %}
-      <p class="text-[10px] text-zinc-600 mt-0.5">{{ event.date_display }}</p>
+      <p class="text-[10px] text-zinc-500 mt-0.5">{{ event.date_display }}</p>
     </div>
     {% endif %}
   </div>
 
   <!-- 路線資訊 -->
   {% if event.distance_km or event.elevation_m %}
-  <div class="flex items-center gap-3 mb-3 font-mono text-[11px] text-zinc-500">
+  <div class="flex items-center gap-3 mb-3 font-mono text-[11px] text-zinc-400">
     {% if event.distance_km %}
     <span>{{ event.distance_km }} km</span>
     {% endif %}
