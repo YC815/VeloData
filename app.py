@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template, redirect, request, url_for, jsonify
-from dotenv import load_dotenv, set_key, find_dotenv
+from dotenv import load_dotenv
 import requests
 import pytz
 
@@ -14,8 +14,6 @@ from ftp_calibration import estimate_ftp
 load_dotenv()
 app = Flask(__name__)
 init_db(app)
-
-DOTENV_PATH = find_dotenv() or os.path.join(os.path.dirname(__file__), '.env')
 
 STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize"
 STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token"
@@ -36,22 +34,43 @@ def get_user_profile():
     return profile
 
 
+def _get_refresh_token() -> str:
+    """DB 優先，回退到 env var（首次部署 / 本機開發用）。"""
+    profile = get_user_profile()
+    if profile.strava_refresh_token:
+        return profile.strava_refresh_token
+    return os.getenv('STRAVA_REFRESH_TOKEN', '')
+
+
+def _save_refresh_token(token: str):
+    """將 refresh token 存入 DB，不寫 .env 檔（雲端重啟安全）。"""
+    profile = get_user_profile()
+    profile.strava_refresh_token = token
+    db.session.commit()
+
+
+def _clear_refresh_token():
+    """登出 / token 失效時清除。"""
+    profile = get_user_profile()
+    profile.strava_refresh_token = None
+    db.session.commit()
+
+
 def refresh_strava_token():
     resp = requests.post(
         STRAVA_TOKEN_URL,
         data={
             'client_id': os.getenv('STRAVA_CLIENT_ID'),
             'client_secret': os.getenv('STRAVA_CLIENT_SECRET'),
-            'refresh_token': os.getenv('STRAVA_REFRESH_TOKEN'),
+            'refresh_token': _get_refresh_token(),
             'grant_type': 'refresh_token'
         }
     )
     resp.raise_for_status()
     data = resp.json()
     new_refresh = data.get('refresh_token')
-    if new_refresh and new_refresh != os.getenv('STRAVA_REFRESH_TOKEN'):
-        os.environ['STRAVA_REFRESH_TOKEN'] = new_refresh
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', new_refresh)
+    if new_refresh:
+        _save_refresh_token(new_refresh)
     return data['access_token']
 
 
@@ -350,14 +369,13 @@ def enrich_activity(act, ftp):
 
 def _require_strava():
     """Returns (header, athlete, profile, redirect_response). redirect_response is non-None on auth failure."""
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+    if not _get_refresh_token():
         return None, None, None, redirect(url_for('auth'))
     try:
         access_token = refresh_strava_token()
     except requests.HTTPError as e:
         if e.response.status_code == 401:
-            os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-            set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+            _clear_refresh_token()
             return None, None, None, redirect(url_for('auth'))
         raise
     header = {'Authorization': f'Bearer {access_token}'}
@@ -446,9 +464,7 @@ def callback():
     if not refresh_token:
         return render_template('login.html', error='授權成功但未取得 refresh token。')
 
-    os.environ['STRAVA_REFRESH_TOKEN'] = refresh_token
-    set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', refresh_token)
-
+    _save_refresh_token(refresh_token)
     return redirect(url_for('index'))
 
 
@@ -630,7 +646,7 @@ def api_ftp_suggest_post():
     """重新估算 MMP FTP，結果寫入 DB，回傳新結果。物理逆推由 /api/ftp-physics 單獨處理。"""
     import json as _json
 
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+    if not _get_refresh_token():
         return jsonify({'error': '未授權'}), 401
 
     try:
@@ -691,7 +707,7 @@ def api_ftp_physics_post():
     import json as _json
     from ftp_calibration import _find_segment_effort, _SEGMENT_ROUTE_MAP
 
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+    if not _get_refresh_token():
         return jsonify({'error': '未授權'}), 401
 
     data = request.get_json(force=True)
@@ -793,7 +809,7 @@ def api_ftp_physics_post():
 @app.route('/api/activities-with-power', methods=['GET'])
 def api_activities_with_power():
     """回傳近 90 天有功率計的活動精簡列表，供物理逆推選單使用。"""
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+    if not _get_refresh_token():
         return jsonify({'error': '未授權'}), 401
 
     try:
@@ -849,7 +865,7 @@ def api_activities_cache_info():
 
 @app.route('/api/activities/refresh', methods=['POST'])
 def api_activities_refresh():
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+    if not _get_refresh_token():
         return jsonify({'error': '未授權'}), 401
     try:
         access_token = refresh_strava_token()
@@ -881,8 +897,7 @@ def index():
 
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
-        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        _clear_refresh_token()
         return redirect(url_for('auth'))
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
@@ -924,8 +939,7 @@ def partial_dashboard():
     ftp = profile.ftp_watts
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
-        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        _clear_refresh_token()
         return redirect(url_for('auth'))
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
@@ -965,8 +979,7 @@ def partial_analysis():
     weight_kg = profile.weight_kg
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
-        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        _clear_refresh_token()
         return redirect(url_for('auth'))
 
     bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
@@ -1008,8 +1021,7 @@ def partial_racing():
     bike_weight_kg = profile.bike_weight_kg
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
-        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        _clear_refresh_token()
         return redirect(url_for('auth'))
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)
@@ -1059,7 +1071,7 @@ def partial_profile():
 def api_export_for_ai():
     import json as _json
 
-    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+    if not _get_refresh_token():
         return jsonify({'error': '未授權'}), 401
 
     profile = get_user_profile()
@@ -1177,8 +1189,7 @@ def analysis():
 
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
-        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        _clear_refresh_token()
         return redirect(url_for('auth'))
 
     bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
@@ -1222,8 +1233,7 @@ def racing():
 
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
-        os.environ.pop('STRAVA_REFRESH_TOKEN', None)
-        set_key(DOTENV_PATH, 'STRAVA_REFRESH_TOKEN', '')
+        _clear_refresh_token()
         return redirect(url_for('auth'))
 
     pmc = calc_pmc(acts_raw, ftp, profile.timezone)

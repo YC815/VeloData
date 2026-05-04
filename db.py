@@ -24,6 +24,7 @@ class UserProfile(db.Model):
     ftp_suggest_at = db.Column(db.DateTime, nullable=True)
     activities_cache = db.Column(db.Text, nullable=True)
     activities_cache_at = db.Column(db.DateTime, nullable=True)
+    strava_refresh_token = db.Column(db.String(256), nullable=True)
 
     def is_activities_cache_valid(self):
         if not self.activities_cache or not self.activities_cache_at:
@@ -107,6 +108,7 @@ def init_db(app):
         _migrate_add_column_if_missing(engine, 'user_profile', 'ftp_suggest_at', 'DATETIME')
         _migrate_add_column_if_missing(engine, 'user_profile', 'activities_cache', 'TEXT')
         _migrate_add_column_if_missing(engine, 'user_profile', 'activities_cache_at', 'DATETIME')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'strava_refresh_token', 'VARCHAR(256)')
         if not UserProfile.query.first():
             db.session.add(UserProfile(ftp_watts=DEFAULT_FTP, weight_kg=DEFAULT_WEIGHT))
             db.session.commit()
