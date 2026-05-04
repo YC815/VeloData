@@ -38,7 +38,7 @@
 
 <div id="actGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
   {% for act in activities %}
-  <div class="act-card bg-zinc-900/60 rounded-2xl border border-white/8 hover:border-white/10 hover:bg-zinc-800/60 transition flex flex-col"
+  <div class="act-card bg-zinc-900/80 rounded-2xl border border-white/8 hover:border-white/15 hover:bg-zinc-800/50 transition-all flex flex-col group"
     data-idx="{{ loop.index0 }}"
     data-ts="{{ act.utc_dt.timestamp() | int }}"
     data-watts="{{ act.avg_watts or 0 }}"
@@ -53,8 +53,8 @@
       </div>
       {% if act.tss %}
       <div class="text-right flex-shrink-0">
-        <div class="text-yellow-400 font-mono font-bold text-lg leading-none">{{ act.tss }}</div>
-        <div class="text-xs text-zinc-500 mt-0.5">TSS</div>
+        <div class="text-zinc-100 font-mono font-bold text-xl leading-none">{{ act.tss }}</div>
+        <div class="text-[10px] text-zinc-600 mt-0.5 uppercase tracking-wider">TSS</div>
       </div>
       {% elif act.suffer_score %}
       <div class="text-right flex-shrink-0">
@@ -64,33 +64,33 @@
       {% endif %}
     </div>
 
-    <div class="grid grid-cols-2 gap-px bg-zinc-800 border-t border-white/8 flex-1">
-      <div class="bg-zinc-900/80 px-3 py-2.5">
+    <div class="grid grid-cols-2 border-t border-white/6 flex-1">
+      <div class="px-3 py-2.5 border-r border-white/6">
         <div class="text-xs text-zinc-500 mb-0.5">距離</div>
         <div class="text-sm font-mono font-semibold text-zinc-100">
           {% if act.distance_km %}{{ act.distance_km }} <span class="text-zinc-500 font-normal text-xs">km</span>{% else %}—{% endif %}
         </div>
       </div>
-      <div class="bg-zinc-900/80 px-3 py-2.5">
+      <div class="px-3 py-2.5 border-r border-white/6">
         <div class="text-xs text-zinc-500 mb-0.5">時間</div>
         <div class="text-sm font-mono font-semibold text-zinc-100">{{ act.duration }}</div>
       </div>
-      <div class="bg-zinc-900/80 px-3 py-2.5">
+      <div class="px-3 py-2.5 border-r border-white/6">
         <div class="text-xs text-zinc-500 mb-0.5">爬升</div>
         <div class="text-sm font-mono font-semibold text-zinc-100">
           {% if act.elevation_m > 0 %}{{ act.elevation_m }} <span class="text-zinc-500 font-normal text-xs">m</span>{% else %}—{% endif %}
         </div>
       </div>
-      <div class="bg-zinc-900/80 px-3 py-2.5">
+      <div class="px-3 py-2.5 border-r border-white/6">
         <div class="text-xs text-zinc-500 mb-0.5">均速</div>
         <div class="text-sm font-mono font-semibold text-zinc-100">
           {% if act.avg_speed_kmh %}{{ act.avg_speed_kmh }} <span class="text-zinc-500 font-normal text-xs">km/h</span>{% else %}—{% endif %}
         </div>
       </div>
-      <div class="col-span-2 bg-zinc-900/80 px-3 py-2.5">
+      <div class="col-span-2 px-3 py-2.5">
         <div class="text-xs text-zinc-500 mb-1">功率表現</div>
         {% if act.has_power and act.avg_watts %}
-        <div class="text-sm font-mono font-semibold text-orange-300">
+        <div class="text-sm font-mono font-semibold text-cyan-400">
           均瓦 {{ act.avg_watts }}<span class="text-xs font-normal"> W</span>
           <span class="text-zinc-600 mx-1">|</span>
           NP {{ act.weighted_watts or '—' }}<span class="text-xs font-normal"> W</span>
@@ -102,13 +102,13 @@
         <div class="text-sm font-mono font-semibold text-zinc-600">—</div>
         {% endif %}
       </div>
-      <div class="bg-zinc-900/80 px-3 py-2.5">
+      <div class="px-3 py-2.5 border-r border-white/6">
         <div class="text-xs text-zinc-500 mb-0.5">踏頻</div>
         <div class="text-sm font-mono font-semibold text-zinc-100">
           {% if act.avg_cadence %}{{ act.avg_cadence }} <span class="text-zinc-500 font-normal text-xs">rpm</span>{% else %}—{% endif %}
         </div>
       </div>
-      <div class="bg-zinc-900/80 px-3 py-2.5 rounded-br-2xl">
+      <div class="px-3 py-2.5">
         <div class="text-xs text-zinc-500 mb-0.5">心率</div>
         <div class="text-sm font-mono font-semibold text-zinc-100">
           {% if act.avg_hr %}{{ act.avg_hr }} <span class="text-zinc-500 font-normal text-xs">bpm</span>{% else %}—{% endif %}
