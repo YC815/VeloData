@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import requests
 import pytz
 
-from db import db, UserProfile, RaceEvent, init_db
+from db import db, UserProfile, RaceEvent, init_db, DEFAULT_WEIGHT, DEFAULT_BIKE_WEIGHT
 from wuling_engine import WulingPredictor, ROUTE_DISTANCE_KM, calc_subx_ftp
 from predictor import RoutePredictor, load_route, list_routes, calc_subx_ftp as _route_calc_subx_ftp
 from ftp_calibration import estimate_ftp
@@ -14,6 +14,10 @@ from ftp_calibration import estimate_ftp
 load_dotenv()
 app = Flask(__name__)
 init_db(app)
+
+# In-memory compute cache: key=(activities_cache_at_iso, ftp, weight, bike_weight)
+# value={'pmc': ..., 'weekly_stats': ..., 'wuling': ..., 'wuling_subx': ..., 'benchmarks': ...}
+_COMPUTE_CACHE: dict = {}
 
 STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize"
 STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token"
@@ -399,6 +403,35 @@ def _require_strava():
     return header, athlete, profile, None
 
 
+def _get_computed(acts_raw, profile) -> dict:
+    """取得或計算 PMC、weekly stats、wuling、benchmarks，結果存 in-memory 快取。"""
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg or DEFAULT_WEIGHT
+    bike_weight_kg = profile.bike_weight_kg or DEFAULT_BIKE_WEIGHT
+    cache_ts = profile.activities_cache_at.isoformat() if profile.activities_cache_at else ''
+    key = (cache_ts, ftp, weight_kg, bike_weight_kg, profile.timezone)
+
+    if key in _COMPUTE_CACHE:
+        return _COMPUTE_CACHE[key]
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    tsb = pmc['current_tsb']
+    result = {
+        'pmc': pmc,
+        'weekly_stats': _calc_weekly_stats(acts_raw, ftp, profile),
+        'tsb_status': calc_tsb_status(tsb),
+        'wuling': calc_wuling(ftp, weight_kg, tsb, bike_weight_kg),
+        'wuling_subx': calc_wuling_subx(ftp, weight_kg, tsb, bike_weight_kg),
+        'benchmarks': calc_all_routes_benchmark(ftp, weight_kg, tsb, bike_weight_kg),
+        'used_timezones': _extract_used_timezones(acts_raw),
+    }
+
+    # 只保留最近一筆，防止 memory 無限成長
+    _COMPUTE_CACHE.clear()
+    _COMPUTE_CACHE[key] = result
+    return result
+
+
 def _extract_used_timezones(acts_raw):
     used_tz_raw = [act.get('timezone', '') for act in acts_raw if act.get('timezone')]
     return list(dict.fromkeys(
@@ -546,6 +579,7 @@ def api_profile_put():
             pass
 
     db.session.commit()
+    _COMPUTE_CACHE.clear()
     return jsonify(profile.to_dict())
 
 
@@ -892,6 +926,8 @@ def api_activities_refresh():
     if data is None:
         return jsonify({'error': '無法取得活動資料'}), 401
 
+    _COMPUTE_CACHE.clear()
+
     profile = get_user_profile()
     cached_at = profile.activities_cache_at
     return jsonify({
@@ -915,30 +951,25 @@ def index():
         _clear_refresh_token()
         return redirect(url_for('auth'))
 
-    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
-    chart_data = {
-        'labels': pmc['labels'][-42:],
-        'ctl': pmc['ctl'][-42:],
-        'atl': pmc['atl'][-42:],
-        'tsb': pmc['tsb'][-42:],
-    }
-    tsb_status = calc_tsb_status(pmc['current_tsb'])
-    stats = _calc_weekly_stats(acts_raw, ftp, profile)
-    used_timezones = _extract_used_timezones(acts_raw)
+    computed = _get_computed(acts_raw, profile)
+    pmc = computed['pmc']
+    chart_data = {'labels': pmc['labels'][-42:], 'ctl': pmc['ctl'][-42:],
+                  'atl': pmc['atl'][-42:], 'tsb': pmc['tsb'][-42:]}
+    stats = computed['weekly_stats']
 
     return render_template(
         'index.html',
         athlete=athlete,
-        ftp=ftp,
-        weight_kg=weight_kg,
+        ftp=profile.ftp_watts,
+        weight_kg=profile.weight_kg,
         pmc=pmc,
         chart_data=chart_data,
-        tsb_status=tsb_status,
+        tsb_status=computed['tsb_status'],
         weekly_tss=stats['weekly_tss'],
         weekly_km=stats['weekly_km'],
         weekly_time=stats['weekly_time'],
         timezone=profile.timezone,
-        used_timezones=used_timezones,
+        used_timezones=computed['used_timezones'],
         all_timezones=pytz.all_timezones,
         target_race=_get_next_race(),
         active_tab='dashboard',
@@ -951,76 +982,64 @@ def partial_dashboard():
     if redir:
         return redir
 
-    ftp = profile.ftp_watts
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         _clear_refresh_token()
         return redirect(url_for('auth'))
 
-    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
-    chart_data = {
-        'labels': pmc['labels'][-42:],
-        'ctl': pmc['ctl'][-42:],
-        'atl': pmc['atl'][-42:],
-        'tsb': pmc['tsb'][-42:],
-    }
-    tsb_status = calc_tsb_status(pmc['current_tsb'])
-    stats = _calc_weekly_stats(acts_raw, ftp, profile)
-    used_timezones = _extract_used_timezones(acts_raw)
+    computed = _get_computed(acts_raw, profile)
+    pmc = computed['pmc']
+    chart_data = {'labels': pmc['labels'][-42:], 'ctl': pmc['ctl'][-42:],
+                  'atl': pmc['atl'][-42:], 'tsb': pmc['tsb'][-42:]}
+    stats = computed['weekly_stats']
 
     return render_template(
         'partials/_content_dashboard.html',
         athlete=athlete,
-        ftp=ftp,
+        ftp=profile.ftp_watts,
         weight_kg=profile.weight_kg,
         pmc=pmc,
         chart_data=chart_data,
-        tsb_status=tsb_status,
+        tsb_status=computed['tsb_status'],
         weekly_tss=stats['weekly_tss'],
         weekly_km=stats['weekly_km'],
         weekly_time=stats['weekly_time'],
         timezone=profile.timezone,
-        used_timezones=used_timezones,
+        used_timezones=computed['used_timezones'],
         all_timezones=pytz.all_timezones,
         target_race=_get_next_race(),
     )
+
+
 @app.route('/partials/analysis')
 def partial_analysis():
     header, athlete, profile, redir = _require_strava()
     if redir:
         return redir
 
-    ftp = profile.ftp_watts
-    weight_kg = profile.weight_kg
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         _clear_refresh_token()
         return redirect(url_for('auth'))
 
+    computed = _get_computed(acts_raw, profile)
+    pmc = computed['pmc']
+    chart_data = {'labels': pmc['labels'][-42:], 'ctl': pmc['ctl'][-42:],
+                  'atl': pmc['atl'][-42:], 'tsb': pmc['tsb'][-42:]}
     bike_acts_raw = [a for a in acts_raw if a.get('sport_type') in BIKE_SPORT_TYPES]
-    activities = [enrich_activity(a, ftp) for a in bike_acts_raw]
-
-    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
-    chart_data = {
-        'labels': pmc['labels'][-42:],
-        'ctl': pmc['ctl'][-42:],
-        'atl': pmc['atl'][-42:],
-        'tsb': pmc['tsb'][-42:],
-    }
-    tsb_status = calc_tsb_status(pmc['current_tsb'])
-    used_timezones = _extract_used_timezones(acts_raw)
+    activities = [enrich_activity(a, profile.ftp_watts) for a in bike_acts_raw]
 
     return render_template(
         'partials/_content_analysis.html',
         athlete=athlete,
-        ftp=ftp,
-        weight_kg=weight_kg,
+        ftp=profile.ftp_watts,
+        weight_kg=profile.weight_kg,
         activities=activities,
         pmc=pmc,
         chart_data=chart_data,
-        tsb_status=tsb_status,
+        tsb_status=computed['tsb_status'],
         timezone=profile.timezone,
-        used_timezones=used_timezones,
+        used_timezones=computed['used_timezones'],
         all_timezones=pytz.all_timezones,
     )
 
@@ -1031,35 +1050,26 @@ def partial_racing():
     if redir:
         return redir
 
-    ftp = profile.ftp_watts
-    weight_kg = profile.weight_kg
-    bike_weight_kg = profile.bike_weight_kg
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:
         _clear_refresh_token()
         return redirect(url_for('auth'))
 
-    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
-    tsb_status = calc_tsb_status(pmc['current_tsb'])
-    wuling = calc_wuling(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
-    wuling_subx = calc_wuling_subx(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
-    all_benchmarks = calc_all_routes_benchmark(ftp, weight_kg, pmc['current_tsb'], bike_weight_kg)
-    used_timezones = _extract_used_timezones(acts_raw)
-    upcoming_events = _get_upcoming_events()
+    computed = _get_computed(acts_raw, profile)
 
     return render_template(
         'partials/_content_racing.html',
         athlete=athlete,
-        ftp=ftp,
-        weight_kg=weight_kg,
-        pmc=pmc,
-        tsb_status=tsb_status,
-        wuling=wuling,
-        wuling_subx=wuling_subx,
-        all_benchmarks=all_benchmarks,
-        upcoming_events=upcoming_events,
+        ftp=profile.ftp_watts,
+        weight_kg=profile.weight_kg,
+        pmc=computed['pmc'],
+        tsb_status=computed['tsb_status'],
+        wuling=computed['wuling'],
+        wuling_subx=computed['wuling_subx'],
+        all_benchmarks=computed['benchmarks'],
+        upcoming_events=_get_upcoming_events(),
         timezone=profile.timezone,
-        used_timezones=used_timezones,
+        used_timezones=computed['used_timezones'],
         all_timezones=pytz.all_timezones,
     )
 
