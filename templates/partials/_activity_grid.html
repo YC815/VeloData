@@ -1,30 +1,31 @@
-<div class="flex items-center justify-between mb-4 px-2 gap-3 flex-wrap">
+<!-- Section header -->
+<div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
   <div class="flex items-center gap-2 relative group">
-    <h2 class="text-xl font-bold text-zinc-300">最近騎乘資料</h2>
-    <div class="w-5 h-5 rounded-full bg-zinc-700 border border-white/15 flex items-center justify-center cursor-help text-zinc-400 text-xs font-bold hover:bg-zinc-600 hover:text-zinc-200 transition-colors">?</div>
-    <div class="absolute left-0 top-7 w-80 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl shadow-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+    <h2 class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">最近騎乘資料</h2>
+    <div class="w-4 h-4 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center cursor-help text-zinc-600 text-[9px] font-bold hover:border-white/20 hover:text-zinc-400 transition-colors">?</div>
+    <div class="absolute left-0 top-6 w-80 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed shadow-2xl shadow-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
       <div class="space-y-3">
         <div>
           <p class="font-semibold text-zinc-100 mb-0.5">TSS（訓練壓力分數）</p>
-          <p>這趟騎乘「讓你多累」的總量。100 分大約等於全力騎一小時的疲勞感。<span class="text-zinc-400">騎完 &lt; 50 隔天沒問題；150+ 需要認真休息。</span></p>
+          <p class="text-zinc-400">這趟騎乘「讓你多累」的總量。100 分大約等於全力騎一小時的疲勞感。&lt; 50 隔天沒問題；150+ 需要認真休息。</p>
         </div>
-        <div class="border-t border-white/10 pt-3">
+        <div class="border-t border-white/8 pt-3">
           <p class="font-semibold text-zinc-100 mb-0.5">NP（標準化功率）</p>
-          <p>比均瓦更誠實的強度數字。市區走走停停均瓦看起來低，但 NP 會抓出你那幾腳猛踩對身體的真實傷害。<span class="text-zinc-400">NP 比均瓦高越多，代表騎乘越不穩定。</span></p>
+          <p class="text-zinc-400">比均瓦更誠實的強度數字。NP 比均瓦高越多，代表騎乘越不穩定。</p>
         </div>
-        <div class="border-t border-white/10 pt-3">
+        <div class="border-t border-white/8 pt-3">
           <p class="font-semibold text-zinc-100 mb-0.5">IF（強度因子）</p>
-          <p>這趟騎乘有多「硬」，以你的 FTP 為基準。<span class="text-zinc-400">0.75 以下輕鬆恢復騎、0.85–0.95 甜區訓練、1.0 以上就是在逼極限。</span></p>
+          <p class="text-zinc-400">0.75 以下輕鬆恢復騎、0.85–0.95 甜區訓練、1.0 以上逼極限。</p>
         </div>
       </div>
     </div>
   </div>
   <div class="flex items-center gap-2">
-    <span id="actPageInfo" class="text-xs text-zinc-500"></span>
+    <span id="actPageInfo" class="text-xs text-zinc-600 font-mono"></span>
     <select
       id="actSortSelect"
       onchange="actApplySort()"
-      class="bg-zinc-800 border border-white/10 text-zinc-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-orange-500 transition cursor-pointer"
+      class="bg-zinc-800 border border-white/8 text-zinc-400 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-orange-500/60 transition-colors cursor-pointer hover:border-white/15 hover:text-zinc-200"
     >
       <option value="date_desc">新到舊</option>
       <option value="date_asc">舊到新</option>
@@ -36,9 +37,10 @@
   </div>
 </div>
 
-<div id="actGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- 活動卡片 Grid -->
+<div id="actGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
   {% for act in activities %}
-  <div class="act-card bg-zinc-900/80 rounded-2xl border border-white/8 hover:border-white/15 hover:bg-zinc-800/50 transition-all flex flex-col group"
+  <div class="act-card bg-zinc-900 rounded-2xl border border-white/8 hover:border-white/15 transition-all flex flex-col"
     data-idx="{{ loop.index0 }}"
     data-ts="{{ act.utc_dt.timestamp() | int }}"
     data-watts="{{ act.avg_watts or 0 }}"
@@ -46,100 +48,95 @@
     data-distance="{{ act.distance_km or 0 }}"
     data-tss="{{ act.tss or 0 }}"
   >
-    <div class="p-4 pb-3 flex justify-between items-start gap-2">
+
+    <!-- Header：名稱 + TSS -->
+    <div class="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
       <div class="min-w-0">
-        <div class="font-semibold text-sm text-zinc-100 leading-snug truncate">{{ act.name }}</div>
-        <div class="text-xs text-zinc-500 mt-0.5">{{ act.date_display }} {{ act.time_display }}</div>
+        <p class="font-semibold text-sm text-zinc-100 leading-snug truncate">{{ act.name }}</p>
+        <p class="text-[11px] text-zinc-500 font-mono mt-0.5">{{ act.date_display }} {{ act.time_display }}</p>
       </div>
       {% if act.tss %}
       <div class="text-right flex-shrink-0">
-        <div class="text-zinc-100 font-mono font-bold text-xl leading-none">{{ act.tss }}</div>
-        <div class="text-[10px] text-zinc-600 mt-0.5 uppercase tracking-wider">TSS</div>
+        <p class="text-xl font-black font-mono leading-none
+          {% if act.tss < 50 %}text-zinc-500
+          {% elif act.tss < 100 %}text-zinc-100
+          {% elif act.tss < 150 %}text-amber-400
+          {% else %}text-rose-400{% endif %}">
+          {{ act.tss }}
+        </p>
+        <p class="text-[10px] text-zinc-600 uppercase tracking-wider font-mono mt-0.5">TSS</p>
       </div>
       {% elif act.suffer_score %}
       <div class="text-right flex-shrink-0">
-        <div class="text-purple-400 font-mono font-bold text-lg leading-none">{{ act.suffer_score }}</div>
-        <div class="text-xs text-zinc-500 mt-0.5">Suffer</div>
+        <p class="text-xl font-black font-mono leading-none text-purple-400">{{ act.suffer_score }}</p>
+        <p class="text-[10px] text-zinc-600 uppercase tracking-wider font-mono mt-0.5">Suffer</p>
       </div>
       {% endif %}
     </div>
 
-    <div class="grid grid-cols-2 border-t border-white/6 flex-1">
-      <div class="px-3 py-2.5 border-r border-white/6">
-        <div class="text-xs text-zinc-500 mb-0.5">距離</div>
-        <div class="text-sm font-mono font-semibold text-zinc-100">
-          {% if act.distance_km %}{{ act.distance_km }} <span class="text-zinc-500 font-normal text-xs">km</span>{% else %}—{% endif %}
-        </div>
-      </div>
-      <div class="px-3 py-2.5 border-r border-white/6">
-        <div class="text-xs text-zinc-500 mb-0.5">時間</div>
-        <div class="text-sm font-mono font-semibold text-zinc-100">{{ act.duration }}</div>
-      </div>
-      <div class="px-3 py-2.5 border-r border-white/6">
-        <div class="text-xs text-zinc-500 mb-0.5">爬升</div>
-        <div class="text-sm font-mono font-semibold text-zinc-100">
-          {% if act.elevation_m > 0 %}{{ act.elevation_m }} <span class="text-zinc-500 font-normal text-xs">m</span>{% else %}—{% endif %}
-        </div>
-      </div>
-      <div class="px-3 py-2.5 border-r border-white/6">
-        <div class="text-xs text-zinc-500 mb-0.5">均速</div>
-        <div class="text-sm font-mono font-semibold text-zinc-100">
-          {% if act.avg_speed_kmh %}{{ act.avg_speed_kmh }} <span class="text-zinc-500 font-normal text-xs">km/h</span>{% else %}—{% endif %}
-        </div>
-      </div>
-      <div class="col-span-2 px-3 py-2.5">
-        <div class="text-xs text-zinc-500 mb-1">功率表現</div>
-        {% if act.has_power and act.avg_watts %}
-        <div class="text-sm font-mono font-semibold text-cyan-400">
-          均瓦 {{ act.avg_watts }}<span class="text-xs font-normal"> W</span>
-          <span class="text-zinc-600 mx-1">|</span>
-          NP {{ act.weighted_watts or '—' }}<span class="text-xs font-normal"> W</span>
-        </div>
-        {% if act.vi %}
-        <div class="text-xs text-zinc-400 mt-0.5">變異指數 (VI)：{{ act.vi }}</div>
-        {% endif %}
-        {% else %}
-        <div class="text-sm font-mono font-semibold text-zinc-600">—</div>
-        {% endif %}
-      </div>
-      <div class="px-3 py-2.5 border-r border-white/6">
-        <div class="text-xs text-zinc-500 mb-0.5">踏頻</div>
-        <div class="text-sm font-mono font-semibold text-zinc-100">
-          {% if act.avg_cadence %}{{ act.avg_cadence }} <span class="text-zinc-500 font-normal text-xs">rpm</span>{% else %}—{% endif %}
-        </div>
-      </div>
-      <div class="px-3 py-2.5">
-        <div class="text-xs text-zinc-500 mb-0.5">心率</div>
-        <div class="text-sm font-mono font-semibold text-zinc-100">
-          {% if act.avg_hr %}{{ act.avg_hr }} <span class="text-zinc-500 font-normal text-xs">bpm</span>{% else %}—{% endif %}
-        </div>
-      </div>
+    <!-- 基本數據行：距離 · 時間 · 爬升 · 均速 -->
+    <div class="px-4 py-2.5 border-t border-white/6 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-sm">
+      {% if act.distance_km %}
+      <span class="text-zinc-200 font-semibold">{{ act.distance_km }}<span class="text-zinc-600 font-normal text-xs ml-0.5">km</span></span>
+      {% endif %}
+      <span class="text-zinc-200 font-semibold">{{ act.duration }}</span>
+      {% if act.elevation_m > 0 %}
+      <span class="text-zinc-200 font-semibold">{{ act.elevation_m }}<span class="text-zinc-600 font-normal text-xs ml-0.5">m↑</span></span>
+      {% endif %}
+      {% if act.avg_speed_kmh %}
+      <span class="text-zinc-200 font-semibold">{{ act.avg_speed_kmh }}<span class="text-zinc-600 font-normal text-xs ml-0.5">km/h</span></span>
+      {% endif %}
     </div>
 
-    {% if act.interpretation %}
-    <div class="px-4 py-2.5 border-t border-white/8 text-xs text-zinc-500 rounded-b-2xl">
-      <span class="text-zinc-400">{{ act.interpretation }}</span>
-      <span class="mx-1 text-zinc-700">·</span>
-      IF <span class="font-mono text-zinc-400">{{ act.if_value }}</span>
-    </div>
-    {% elif act.suffer_score %}
-    <div class="px-4 py-2.5 border-t border-white/8 text-xs text-zinc-600 rounded-b-2xl">
-      無功率計，以 Suffer Score 作為壓力指標
+    <!-- 功率行（有功率計才顯示） -->
+    {% if act.has_power and act.avg_watts %}
+    <div class="px-4 py-2.5 border-t border-white/6 font-mono text-xs">
+      <span class="text-cyan-400 font-semibold">均瓦 {{ act.avg_watts }} W</span>
+      {% if act.weighted_watts %}
+      <span class="text-zinc-700 mx-1.5">·</span>
+      <span class="text-zinc-300">NP {{ act.weighted_watts }} W</span>
+      {% endif %}
+      {% if act.vi %}
+      <span class="text-zinc-700 mx-1.5">·</span>
+      <span class="text-zinc-500">VI {{ act.vi }}</span>
+      {% endif %}
     </div>
     {% endif %}
+
+    <!-- Footer：解讀 + IF | 踏頻 · 心率 -->
+    {% if act.interpretation or act.suffer_score or act.avg_cadence or act.avg_hr %}
+    <div class="px-4 py-2.5 border-t border-white/6 flex items-center justify-between gap-2 text-xs mt-auto">
+      <div class="min-w-0">
+        {% if act.interpretation %}
+        <span class="text-zinc-400">{{ act.interpretation }}</span>
+        {% if act.if_value %}<span class="text-zinc-700 mx-1">·</span><span class="font-mono text-zinc-500">IF {{ act.if_value }}</span>{% endif %}
+        {% elif act.suffer_score %}
+        <span class="text-zinc-600">無功率計，以 Suffer Score 計壓力</span>
+        {% endif %}
+      </div>
+      {% if act.avg_cadence or act.avg_hr %}
+      <div class="flex items-center gap-2 text-zinc-600 font-mono flex-shrink-0">
+        {% if act.avg_cadence %}<span>{{ act.avg_cadence }} rpm</span>{% endif %}
+        {% if act.avg_hr %}<span>{{ act.avg_hr }} bpm</span>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
   </div>
   {% else %}
-  <div class="col-span-3 text-center text-zinc-500 py-10">尚無騎乘資料</div>
+  <div class="col-span-3 py-12 text-center text-zinc-600 text-sm">尚無騎乘資料</div>
   {% endfor %}
 </div>
 
-<div id="actPagination" class="flex items-center justify-center gap-4 mt-6 mb-2">
+<!-- 分頁 -->
+<div id="actPagination" class="flex items-center justify-center gap-4 mt-5 mb-2">
   <button
     id="actPrevBtn"
     onclick="actChangePage(actCurrentPage - 1)"
     class="px-4 py-2 rounded-xl bg-zinc-800 border border-white/8 hover:bg-zinc-700 hover:border-white/15 text-zinc-400 hover:text-zinc-200 text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
   >← 上一頁</button>
-  <span id="actPageLabel" class="text-sm text-zinc-400 font-mono min-w-[80px] text-center"></span>
+  <span id="actPageLabel" class="text-sm text-zinc-500 font-mono min-w-[80px] text-center"></span>
   <button
     id="actNextBtn"
     onclick="actChangePage(actCurrentPage + 1)"
