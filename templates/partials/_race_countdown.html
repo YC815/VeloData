@@ -1,5 +1,8 @@
 {% if target_race %}
-<div class="bg-zinc-900 border border-orange-500/30 rounded-2xl p-5 shadow-lg">
+<div class="bg-zinc-900 border border-orange-500/25 rounded-2xl p-5 relative overflow-hidden shadow-lg shadow-orange-500/5">
+  <!-- Orange glow -->
+  <div class="absolute -bottom-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-10 bg-orange-500 pointer-events-none"></div>
+
   <div class="flex items-start justify-between mb-3">
     <div class="min-w-0">
       <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono mb-0.5">最近賽事</p>
@@ -7,16 +10,16 @@
     </div>
     <div class="text-right flex-shrink-0 ml-3">
       {% if target_race.days_until == 0 %}
-        <p class="text-base font-bold text-red-400 font-mono leading-none">今天！</p>
+        <p class="text-2xl font-black text-rose-400 font-mono leading-none">今天！</p>
       {% elif target_race.days_until <= 7 %}
-        <p class="text-base font-bold text-orange-400 font-mono leading-none">{{ target_race.days_until }}</p>
-        <p class="text-[10px] text-zinc-500">天後</p>
+        <p class="text-3xl font-black text-orange-500 font-mono leading-none">{{ target_race.days_until }}</p>
+        <p class="text-xs text-zinc-500 leading-none mt-0.5">天後</p>
       {% elif target_race.days_until <= 30 %}
-        <p class="text-base font-bold text-yellow-400 font-mono leading-none">{{ target_race.days_until }}</p>
-        <p class="text-[10px] text-zinc-500">天後</p>
+        <p class="text-3xl font-black text-amber-400 font-mono leading-none">{{ target_race.days_until }}</p>
+        <p class="text-xs text-zinc-500 leading-none mt-0.5">天後</p>
       {% else %}
-        <p class="text-base font-bold text-zinc-400 font-mono leading-none">{{ target_race.days_until }}</p>
-        <p class="text-[10px] text-zinc-500">天後</p>
+        <p class="text-3xl font-black text-zinc-400 font-mono leading-none">{{ target_race.days_until }}</p>
+        <p class="text-xs text-zinc-500 leading-none mt-0.5">天後</p>
       {% endif %}
     </div>
   </div>
@@ -44,11 +47,11 @@
   {% if pmc and pmc.current_tsb is not none %}
   {% set tsb = pmc.current_tsb %}
   <div class="flex items-center gap-2 rounded-lg px-2.5 py-1.5
-    {% if tsb < -20 %}bg-red-500/10 border border-red-500/20
-    {% elif tsb < 0 %}bg-yellow-500/10 border border-yellow-500/20
-    {% else %}bg-green-500/10 border border-green-500/20{% endif %}">
+    {% if tsb < -20 %}bg-rose-500/10 border border-rose-500/20
+    {% elif tsb < 0 %}bg-amber-500/10 border border-amber-500/20
+    {% else %}bg-emerald-500/10 border border-emerald-500/20{% endif %}">
     <svg class="w-3 h-3 flex-shrink-0
-      {% if tsb < -20 %}text-red-400{% elif tsb < 0 %}text-yellow-400{% else %}text-green-400{% endif %}"
+      {% if tsb < -20 %}text-rose-400{% elif tsb < 0 %}text-amber-400{% else %}text-emerald-400{% endif %}"
       fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       {% if tsb < -20 %}
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
@@ -59,7 +62,7 @@
       {% endif %}
     </svg>
     <p class="text-[10px]
-      {% if tsb < -20 %}text-red-400{% elif tsb < 0 %}text-yellow-400{% else %}text-green-400{% endif %}">
+      {% if tsb < -20 %}text-rose-400{% elif tsb < 0 %}text-amber-400{% else %}text-emerald-400{% endif %}">
       TSB {{ tsb }}
       {% if tsb < -20 %}· 過度訓練，賽前須休息
       {% elif tsb < 0 %}· 輕微疲勞
@@ -69,11 +72,13 @@
   {% endif %}
 </div>
 {% else %}
-<div class="bg-zinc-900/40 border border-white/8 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-2 min-h-[152px]">
-  <svg class="w-6 h-6 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
-  </svg>
-  <p class="text-zinc-500 text-sm">尚未設定目標賽事</p>
+<div class="border border-white/6 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-2 min-h-[152px] bg-zinc-900/30">
+  <div class="w-12 h-12 rounded-2xl bg-zinc-800/60 border border-white/6 flex items-center justify-center mb-1">
+    <svg class="w-6 h-6 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
+    </svg>
+  </div>
+  <p class="text-sm text-zinc-500">尚未設定目標賽事</p>
   <a href="{{ url_for('racing') }}" class="text-orange-400 hover:text-orange-300 text-xs transition">前往賽事規劃設定 →</a>
 </div>
 {% endif %}
