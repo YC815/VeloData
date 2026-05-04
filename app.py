@@ -550,6 +550,43 @@ def api_events_post():
     return jsonify(ev.to_dict()), 201
 
 
+@app.route('/api/events/<int:event_id>', methods=['PUT'])
+def api_events_put(event_id):
+    ev = RaceEvent.query.get(event_id)
+    if not ev:
+        return jsonify({'error': '找不到此賽事'}), 404
+    data = request.get_json(force=True)
+    name = (data.get('name') or '').strip()
+    date_str = data.get('date') or ''
+    priority = data.get('priority') or 'C'
+
+    if not name:
+        return jsonify({'error': '賽事名稱不得為空'}), 400
+    if priority not in ('A', 'B', 'C'):
+        return jsonify({'error': '優先級必須為 A、B 或 C'}), 400
+    try:
+        from datetime import date as _date
+        event_date = _date.fromisoformat(date_str)
+    except ValueError:
+        return jsonify({'error': '日期格式錯誤，請用 YYYY-MM-DD'}), 400
+
+    distance = data.get('distance_km')
+    elevation = data.get('elevation_m')
+    try:
+        distance = float(distance) if distance not in (None, '') else None
+        elevation = int(elevation) if elevation not in (None, '') else None
+    except (ValueError, TypeError):
+        return jsonify({'error': '距離或爬升格式錯誤'}), 400
+
+    ev.name = name
+    ev.event_date = event_date
+    ev.priority = priority
+    ev.distance_km = distance
+    ev.elevation_m = elevation
+    db.session.commit()
+    return jsonify(ev.to_dict())
+
+
 @app.route('/api/events/<int:event_id>', methods=['DELETE'])
 def api_events_delete(event_id):
     ev = RaceEvent.query.get(event_id)

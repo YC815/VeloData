@@ -1,77 +1,21 @@
 <!-- Event Manager：賽事管理清單 -->
 <div id="event-manager-section" class="mt-8">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-sm font-semibold text-slate-200 tracking-wide">賽事管理</h2>
-    <span class="text-[10px] uppercase tracking-widest text-slate-600 font-mono">Event Manager</span>
+    <div>
+      <h2 class="text-sm font-semibold text-slate-200 tracking-wide">賽事管理</h2>
+      <span class="text-[10px] uppercase tracking-widest text-slate-600 font-mono">Event Manager</span>
+    </div>
+    <button onclick="openEventModal()"
+      class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 active:bg-orange-600
+             text-white text-xs font-semibold transition-colors shadow-lg shadow-orange-500/20">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+      新增賽事
+    </button>
   </div>
 
   <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-
-    <!-- 新增表單 -->
-    <div class="p-5 border-b border-slate-800">
-      <p class="text-xs text-slate-500 mb-4">手動錄入報名賽事，A 級賽事會顯示在上方倒數卡片</p>
-      <form id="event-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-
-        <div class="sm:col-span-2 lg:col-span-1">
-          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">賽事名稱</label>
-          <input type="text" id="event-name" placeholder="例：武嶺單車節"
-            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600
-                   focus:outline-none focus:border-orange-500/60 focus:bg-slate-800 transition-colors">
-        </div>
-
-        <div>
-          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">日期</label>
-          <input type="date" id="event-date"
-            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200
-                   focus:outline-none focus:border-orange-500/60 transition-colors
-                   [color-scheme:dark]">
-        </div>
-
-        <div>
-          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">優先級</label>
-          <select id="event-priority"
-            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200
-                   focus:outline-none focus:border-orange-500/60 transition-colors">
-            <option value="A">A 級 — 主要目標</option>
-            <option value="B">B 級 — 次要目標</option>
-            <option value="C">C 級 — 練兵/訓練賽</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">總距離 (km)</label>
-          <input type="number" id="event-distance" placeholder="120" min="0" step="0.1"
-            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600
-                   focus:outline-none focus:border-orange-500/60 transition-colors">
-        </div>
-
-        <div>
-          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">總爬升 (m)</label>
-          <input type="number" id="event-elevation" placeholder="2593" min="0" step="1"
-            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600
-                   focus:outline-none focus:border-orange-500/60 transition-colors">
-        </div>
-
-        <div class="flex items-end">
-          <button type="submit"
-            class="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 active:bg-orange-600
-                   text-white text-sm font-semibold rounded-lg px-4 py-2 transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-            </svg>
-            新增賽事
-          </button>
-        </div>
-      </form>
-
-      <!-- 錯誤提示 -->
-      <div id="event-form-error" class="hidden mt-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-        <svg class="w-3.5 h-3.5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
-        </svg>
-        <p id="event-form-error-text" class="text-xs text-red-400"></p>
-      </div>
-    </div>
 
     <!-- 賽事清單 -->
     <div id="event-list-container" class="divide-y divide-slate-800">
@@ -80,14 +24,195 @@
 
     <!-- 空態 -->
     <div id="event-list-empty" class="hidden px-5 py-8 text-center">
-      <p class="text-slate-600 text-sm">尚未新增任何賽事</p>
+      <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+        </svg>
+      </div>
+      <p class="text-slate-500 text-sm">尚未新增任何賽事</p>
+      <p class="text-slate-700 text-xs mt-1">點擊右上角「新增賽事」開始規劃</p>
     </div>
 
   </div>
 </div>
 
+<!-- 新增賽事 Modal -->
+<div id="event-modal-backdrop"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  style="background: rgba(2,6,23,0.75); backdrop-filter: blur(4px);"
+  onclick="closeEventModal(event)">
+
+  <div id="event-modal"
+    class="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl
+           transform transition-all duration-200 scale-95 opacity-0"
+    onclick="event.stopPropagation()">
+
+    <!-- Modal 標頭 -->
+    <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-800">
+      <div>
+        <h3 id="event-modal-title" class="text-sm font-semibold text-slate-100">新增賽事</h3>
+        <p class="text-[10px] text-slate-500 mt-0.5">A 級賽事會顯示在上方倒數卡片</p>
+      </div>
+      <button onclick="closeEventModal()"
+        class="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-slate-800">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal 表單 -->
+    <form id="event-form" class="px-5 py-4 space-y-4">
+
+      <div>
+        <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">賽事名稱</label>
+        <input type="text" id="event-name" placeholder="例：武嶺單車節"
+          class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600
+                 focus:outline-none focus:border-orange-500/60 focus:bg-slate-800 transition-colors">
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">日期</label>
+        <div class="grid grid-cols-3 gap-2">
+          <input type="number" id="event-year" placeholder="年"
+            min="2020" max="2099" step="1"
+            class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600
+                   focus:outline-none focus:border-orange-500/60 transition-colors text-center">
+          <input type="number" id="event-month" placeholder="月"
+            min="1" max="12" step="1"
+            class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600
+                   focus:outline-none focus:border-orange-500/60 transition-colors text-center">
+          <input type="number" id="event-day" placeholder="日"
+            min="1" max="31" step="1"
+            class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600
+                   focus:outline-none focus:border-orange-500/60 transition-colors text-center">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">優先級</label>
+        <select id="event-priority"
+          class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200
+                 focus:outline-none focus:border-orange-500/60 transition-colors">
+          <option value="A">A 級 — 主要目標</option>
+          <option value="B">B 級 — 次要目標</option>
+          <option value="C">C 級 — 練兵/訓練賽</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">總距離 (km)</label>
+          <input type="number" id="event-distance" placeholder="120" min="0" step="0.1"
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600
+                   focus:outline-none focus:border-orange-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 font-mono">總爬升 (m)</label>
+          <input type="number" id="event-elevation" placeholder="2593" min="0" step="1"
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600
+                   focus:outline-none focus:border-orange-500/60 transition-colors">
+        </div>
+      </div>
+
+      <!-- 錯誤提示 -->
+      <div id="event-form-error" class="hidden flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+        <svg class="w-3.5 h-3.5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+        </svg>
+        <p id="event-form-error-text" class="text-xs text-red-400"></p>
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" onclick="closeEventModal()"
+          class="flex-1 px-4 py-2.5 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200
+                 hover:border-slate-600 text-sm font-medium transition-colors">
+          取消
+        </button>
+        <button type="submit" id="event-submit-btn"
+          class="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 active:bg-orange-600
+                 text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" id="event-submit-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+          <span id="event-submit-label">新增賽事</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
 <script>
 (function () {
+  let _editingId = null; // null = 新增模式，數字 = 編輯模式
+
+  /* ── Modal 開關 ── */
+  function openModal() {
+    const backdrop = document.getElementById('event-modal-backdrop');
+    const modal = document.getElementById('event-modal');
+    backdrop.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      modal.classList.remove('scale-95', 'opacity-0');
+      modal.classList.add('scale-100', 'opacity-100');
+    });
+    document.getElementById('event-name').focus();
+  }
+
+  function dismissModal() {
+    const backdrop = document.getElementById('event-modal-backdrop');
+    const modal = document.getElementById('event-modal');
+    modal.classList.add('scale-95', 'opacity-0');
+    modal.classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => backdrop.classList.add('hidden'), 180);
+    hideError();
+  }
+
+  window.openEventModal = function () {
+    _editingId = null;
+    document.getElementById('event-modal-title').textContent = '新增賽事';
+    document.getElementById('event-submit-label').textContent = '新增賽事';
+    document.getElementById('event-submit-icon').innerHTML =
+      '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>';
+    ['event-name','event-year','event-month','event-day','event-distance','event-elevation'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('event-priority').value = 'A';
+    openModal();
+  };
+
+  window.editEvent = function (ev) {
+    _editingId = ev.id;
+    document.getElementById('event-modal-title').textContent = '編輯賽事';
+    document.getElementById('event-submit-label').textContent = '儲存變更';
+    document.getElementById('event-submit-icon').innerHTML =
+      '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
+
+    document.getElementById('event-name').value = ev.name;
+    const parts = ev.date.split('-');
+    document.getElementById('event-year').value  = parts[0] || '';
+    document.getElementById('event-month').value = parseInt(parts[1] || '0', 10) || '';
+    document.getElementById('event-day').value   = parseInt(parts[2] || '0', 10) || '';
+    document.getElementById('event-priority').value = ev.priority;
+    document.getElementById('event-distance').value  = ev.distance_km || '';
+    document.getElementById('event-elevation').value = ev.elevation_m || '';
+    openModal();
+  };
+
+  window.closeEventModal = function (e) {
+    if (e && e.target !== document.getElementById('event-modal-backdrop')) return;
+    dismissModal();
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      const backdrop = document.getElementById('event-modal-backdrop');
+      if (!backdrop.classList.contains('hidden')) dismissModal();
+    }
+  });
+
+  /* ── 工具函式 ── */
   function daysUntil(dateStr) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -125,8 +250,9 @@
 
     container.innerHTML = events.map(ev => {
       const days = daysUntil(ev.date);
-      const dateFormatted = new Date(ev.date + 'T00:00:00').toLocaleDateString('zh-TW', {month: 'numeric', day: 'numeric'});
+      const dateFormatted = new Date(ev.date + 'T00:00:00').toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
       const isPast = days < 0;
+      const evJson = encodeURIComponent(JSON.stringify(ev));
       return `
         <div class="flex items-center justify-between px-5 py-3.5 ${isPast ? 'opacity-40' : ''}">
           <div class="flex items-center gap-3 min-w-0">
@@ -140,10 +266,18 @@
               </div>
             </div>
           </div>
-          <div class="flex items-center gap-3 flex-shrink-0 ml-4">
+          <div class="flex items-center gap-2 flex-shrink-0 ml-4">
             ${countdownBadge(days)}
+            <button onclick="editEvent(JSON.parse(decodeURIComponent('${evJson}')))"
+              title="編輯"
+              class="text-slate-600 hover:text-orange-400 transition-colors p-1 rounded">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
+              </svg>
+            </button>
             <button onclick="deleteEvent(${ev.id})"
-              class="text-slate-700 hover:text-red-400 transition-colors p-1 rounded">
+              title="刪除"
+              class="text-slate-600 hover:text-red-400 transition-colors p-1 rounded">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
               </svg>
@@ -165,6 +299,10 @@
     document.getElementById('event-form-error').classList.add('hidden');
   }
 
+  function reloadPage() {
+    htmx.ajax('GET', '/partials/racing', { target: '#content', swap: 'innerHTML' });
+  }
+
   function loadAndRender() {
     fetch('/api/events')
       .then(r => r.json())
@@ -172,31 +310,44 @@
       .catch(() => renderList([]));
   }
 
-  window.deleteEvent = function(id) {
+  window.deleteEvent = function (id) {
     fetch(`/api/events/${id}`, { method: 'DELETE' })
       .then(r => r.json())
-      .then(() => loadAndRender())
+      .then(() => reloadPage())
       .catch(() => showError('刪除失敗，請重試'));
   };
 
-  document.getElementById('event-form').addEventListener('submit', function(e) {
+  /* ── 表單提交（新增 / 編輯共用） ── */
+  document.getElementById('event-form').addEventListener('submit', function (e) {
     e.preventDefault();
     hideError();
 
     const name = document.getElementById('event-name').value.trim();
-    const date = document.getElementById('event-date').value;
-    const priority = document.getElementById('event-priority').value;
-    const distance = document.getElementById('event-distance').value;
+    const year  = document.getElementById('event-year').value.trim();
+    const month = document.getElementById('event-month').value.trim();
+    const day   = document.getElementById('event-day').value.trim();
+    const priority  = document.getElementById('event-priority').value;
+    const distance  = document.getElementById('event-distance').value;
     const elevation = document.getElementById('event-elevation').value;
 
     if (!name) { showError('請輸入賽事名稱'); return; }
-    if (!date) { showError('請選擇賽事日期'); return; }
+    if (!year || !month || !day) { showError('請完整填寫年、月、日'); return; }
+
+    const mm = String(month).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    const date = `${year}-${mm}-${dd}`;
+
+    if (isNaN(Date.parse(date + 'T00:00:00'))) { showError('日期格式不正確'); return; }
 
     const btn = this.querySelector('button[type="submit"]');
     btn.disabled = true;
 
-    fetch('/api/events', {
-      method: 'POST',
+    const isEdit = _editingId !== null;
+    const url    = isEdit ? `/api/events/${_editingId}` : '/api/events';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name,
@@ -208,12 +359,9 @@
     })
       .then(r => r.json().then(data => ({ ok: r.ok, data })))
       .then(({ ok, data }) => {
-        if (!ok) { showError(data.error || '新增失敗'); return; }
-        document.getElementById('event-name').value = '';
-        document.getElementById('event-date').value = '';
-        document.getElementById('event-distance').value = '';
-        document.getElementById('event-elevation').value = '';
-        loadAndRender();
+        if (!ok) { showError(data.error || (isEdit ? '更新失敗' : '新增失敗')); return; }
+        dismissModal();
+        reloadPage();
       })
       .catch(() => showError('網路錯誤，請重試'))
       .finally(() => { btn.disabled = false; });
