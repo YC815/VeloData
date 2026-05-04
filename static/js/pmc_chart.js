@@ -59,8 +59,8 @@ function initPmcChart() {
         {
           label: 'CTL',
           data: pmcData.ctl,
-          borderColor: 'rgb(96, 165, 250)',
-          backgroundColor: 'rgba(96, 165, 250, 0.08)',
+          borderColor: 'rgb(34, 211, 238)',
+          backgroundColor: 'rgba(34, 211, 238, 0.08)',
           borderWidth: 2,
           pointRadius: 0,
           fill: false,
@@ -119,7 +119,7 @@ function initPmcChart() {
       plugins: {
         legend: {
           labels: {
-            color: '#94a3b8',
+            color: '#a1a1aa',
             font: { size: 11 },
             boxWidth: 20,
             generateLabels(chart) {
@@ -139,21 +139,21 @@ function initPmcChart() {
         tooltip: {
           mode: 'index',
           intersect: false,
-          backgroundColor: '#0f172a',
-          borderColor: '#334155',
+          backgroundColor: '#18181b',
+          borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
+          titleColor: '#f4f4f5',
+          bodyColor: '#a1a1aa',
         },
       },
       scales: {
         x: {
-          ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } },
-          grid: { color: '#1e293b' },
+          ticks: { color: '#71717a', maxTicksLimit: 10, font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
         },
         y: {
-          ticks: { color: '#64748b', font: { size: 10 } },
-          grid: { color: '#1e293b' },
+          ticks: { color: '#71717a', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
         },
       },
       interaction: { mode: 'nearest', axis: 'x', intersect: false },

@@ -1,16 +1,16 @@
-<div class="bg-zinc-900 p-6 rounded-2xl border border-white/8 shadow-xl mb-10">
+<div class="bg-zinc-900 p-6 rounded-2xl border border-white/8 mb-10">
   <div class="flex items-start justify-between mb-4">
     <div>
-      <h2 class="text-lg font-bold text-zinc-300">Performance Management Chart</h2>
-      <p class="text-xs text-zinc-500 mt-0.5">過去 42 天體能管理趨勢</p>
+      <h2 class="text-lg font-bold text-zinc-200">體能管理圖</h2>
+      <p class="text-xs text-zinc-500 mt-0.5">CTL / ATL / TSB 過去 42 天</p>
     </div>
     <div class="flex gap-2 flex-wrap justify-end items-center">
       <span
-        class="bg-blue-900/40 border border-blue-800/50 text-blue-300 text-xs px-3 py-1 rounded-full font-mono cursor-help"
+        class="bg-cyan-950/40 border border-cyan-900/30 text-cyan-400 ctl-value text-xs px-3 py-1 rounded-full font-mono cursor-help"
         title="CTL 慢性訓練負荷：42 天加權平均，代表長期體能基礎"
       >CTL {{ pmc.current_ctl }}</span>
       <span
-        class="bg-orange-900/40 border border-orange-800/50 text-orange-300 text-xs px-3 py-1 rounded-full font-mono cursor-help"
+        class="bg-orange-950/40 border border-orange-900/30 text-orange-500 atl-value text-xs px-3 py-1 rounded-full font-mono cursor-help"
         title="ATL 急性訓練負荷：7 天加權平均，代表近期疲勞程度"
       >ATL {{ pmc.current_atl }}</span>
       <span class="text-xs px-3 py-1 rounded-full font-mono cursor-help
@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <div class="relative h-56">
+  <div class="relative h-64">
     <canvas id="pmcChart"></canvas>
   </div>
 
