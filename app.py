@@ -274,12 +274,13 @@ def _get_upcoming_events():
     from datetime import date as _date
     today = _date.today()
     cutoff = today + timedelta(days=90)
-    return (RaceEvent.query
+    rows = (RaceEvent.query
             .filter(RaceEvent.event_date >= today)
             .filter(RaceEvent.event_date <= cutoff)
             .filter(RaceEvent.priority.in_(['A', 'B']))
             .order_by(RaceEvent.event_date)
             .all())
+    return [r.to_dict() for r in rows]
 
 
 def enrich_activity(act, ftp):

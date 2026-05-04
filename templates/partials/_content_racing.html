@@ -1,10 +1,13 @@
-<!-- 區塊一：近期目標賽事 -->
-{% include 'partials/_race_list.html' %}
+<!-- 區塊一：賽事規劃（近期賽事卡片 + 賽事管理清單 同一塊） -->
+<div class="mb-6">
+  <!-- 近期目標賽事卡片（置頂） -->
+  {% include 'partials/_race_list.html' %}
+
+  <!-- 賽事管理清單（緊接其下，同一容器） -->
+  {% include 'partials/_event_manager.html' %}
+</div>
 
 <!-- 區塊二：指標路段挑戰 (Benchmark Lab) -->
 <div class="mb-6">
   {% include 'partials/_kpi_wuling.html' %}
 </div>
-
-<!-- 區塊三：賽事管理清單 -->
-{% include 'partials/_event_manager.html' %}
