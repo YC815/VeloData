@@ -2,6 +2,7 @@
   "id": "fenggueizui",
   "name": "風櫃嘴（楓林橋線）",
   "description": "楓林橋→風櫃嘴頂",
+  "strava_segment_id": 641218,
   "distance_km": 6.4,
   "elevation_m": 411,
   "physics": {
