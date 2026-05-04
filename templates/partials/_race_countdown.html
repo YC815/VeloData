@@ -1,27 +1,27 @@
 {% if target_race %}
-<div class="bg-slate-900 border border-orange-500/30 rounded-2xl p-5 shadow-lg">
+<div class="bg-zinc-900 border border-orange-500/30 rounded-2xl p-5 shadow-lg">
   <div class="flex items-start justify-between mb-3">
     <div class="min-w-0">
-      <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono mb-0.5">最近賽事</p>
-      <h4 class="text-sm font-semibold text-slate-200 truncate">{{ target_race.name }}</h4>
+      <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono mb-0.5">最近賽事</p>
+      <h4 class="text-sm font-semibold text-zinc-200 truncate">{{ target_race.name }}</h4>
     </div>
     <div class="text-right flex-shrink-0 ml-3">
       {% if target_race.days_until == 0 %}
         <p class="text-base font-bold text-red-400 font-mono leading-none">今天！</p>
       {% elif target_race.days_until <= 7 %}
         <p class="text-base font-bold text-orange-400 font-mono leading-none">{{ target_race.days_until }}</p>
-        <p class="text-[10px] text-slate-500">天後</p>
+        <p class="text-[10px] text-zinc-500">天後</p>
       {% elif target_race.days_until <= 30 %}
         <p class="text-base font-bold text-yellow-400 font-mono leading-none">{{ target_race.days_until }}</p>
-        <p class="text-[10px] text-slate-500">天後</p>
+        <p class="text-[10px] text-zinc-500">天後</p>
       {% else %}
-        <p class="text-base font-bold text-slate-400 font-mono leading-none">{{ target_race.days_until }}</p>
-        <p class="text-[10px] text-slate-500">天後</p>
+        <p class="text-base font-bold text-zinc-400 font-mono leading-none">{{ target_race.days_until }}</p>
+        <p class="text-[10px] text-zinc-500">天後</p>
       {% endif %}
     </div>
   </div>
 
-  <div class="flex items-center gap-3 text-[11px] text-slate-500 mb-3">
+  <div class="flex items-center gap-3 text-[11px] text-zinc-500 mb-3">
     <span>{{ target_race.date_display }}</span>
     {% if target_race.distance_km %}
     <span class="flex items-center gap-1">
@@ -69,11 +69,11 @@
   {% endif %}
 </div>
 {% else %}
-<div class="bg-slate-900/40 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-2 min-h-[152px]">
-  <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+<div class="bg-zinc-900/40 border border-white/8 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-2 min-h-[152px]">
+  <svg class="w-6 h-6 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
     <path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
   </svg>
-  <p class="text-slate-500 text-sm">尚未設定目標賽事</p>
+  <p class="text-zinc-500 text-sm">尚未設定目標賽事</p>
   <a href="{{ url_for('racing') }}" class="text-orange-400 hover:text-orange-300 text-xs transition">前往賽事規劃設定 →</a>
 </div>
 {% endif %}

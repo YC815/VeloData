@@ -1,47 +1,47 @@
 <!-- Benchmark Lab：指標路段挑戰 -->
-<div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+<div class="bg-zinc-900 border border-white/8 rounded-2xl shadow-xl overflow-hidden">
 
   <!-- 標頭 -->
-  <div class="px-5 pt-5 pb-4 border-b border-slate-800 flex items-center justify-between">
+  <div class="px-5 pt-5 pb-4 border-b border-white/8 flex items-center justify-between">
     <div>
-      <h3 class="text-sm font-semibold text-slate-200 tracking-wide">指標路段挑戰</h3>
-      <p class="text-xs text-slate-500 mt-0.5">點擊路段查看詳細預測與突破目標</p>
+      <h3 class="text-sm font-semibold text-zinc-200 tracking-wide">指標路段挑戰</h3>
+      <p class="text-xs text-zinc-500 mt-0.5">點擊路段查看詳細預測與突破目標</p>
     </div>
-    <span class="text-[10px] uppercase tracking-widest text-slate-600 font-mono bg-slate-800 px-2 py-1 rounded-md">Benchmark Lab</span>
+    <span class="text-[10px] uppercase tracking-widest text-zinc-600 font-mono bg-zinc-800 px-2 py-1 rounded-md">Benchmark Lab</span>
   </div>
 
   {% if all_benchmarks %}
-  <div class="divide-y divide-slate-800">
+  <div class="divide-y divide-white/8">
     {% for rt in all_benchmarks %}
     <div class="benchmark-row" data-idx="{{ loop.index }}">
 
       <!-- 摘要列（常駐顯示） -->
       <button
         type="button"
-        class="benchmark-toggle w-full text-left px-5 py-3.5 flex items-center gap-4 hover:bg-slate-800/40 transition-colors group"
+        class="benchmark-toggle w-full text-left px-5 py-3.5 flex items-center gap-4 hover:bg-zinc-800/40 transition-colors group"
         aria-expanded="false"
         aria-controls="bench-detail-{{ loop.index }}"
       >
         <!-- 路線名稱 + 說明 -->
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-slate-200 truncate">{{ rt.name }}</span>
+            <span class="text-sm font-semibold text-zinc-200 truncate">{{ rt.name }}</span>
             {% if rt.subx and rt.subx | selectattr('achievable') | list %}
             <span class="text-[9px] uppercase tracking-wider bg-green-500/15 text-green-400 border border-green-500/25 px-1.5 py-0.5 rounded font-mono flex-shrink-0">達標</span>
             {% endif %}
           </div>
-          <p class="text-[11px] text-slate-500 mt-0.5 truncate">{{ rt.description }}</p>
+          <p class="text-[11px] text-zinc-500 mt-0.5 truncate">{{ rt.description }}</p>
         </div>
 
         <!-- 核心數據 chip 群 -->
         <div class="hidden sm:flex items-center gap-3 flex-shrink-0">
           <div class="text-right">
-            <p class="text-[10px] text-slate-500 font-mono">距離 / 爬升</p>
-            <p class="text-xs font-mono text-slate-300">{{ rt.distance_km }} km · {{ rt.elevation_m }} m↑</p>
+            <p class="text-[10px] text-zinc-500 font-mono">距離 / 爬升</p>
+            <p class="text-xs font-mono text-zinc-300">{{ rt.distance_km }} km · {{ rt.elevation_m }} m↑</p>
           </div>
-          <div class="w-px h-6 bg-slate-700"></div>
+          <div class="w-px h-6 bg-zinc-700"></div>
           <div class="text-right">
-            <p class="text-[10px] text-slate-500 font-mono">當下預測</p>
+            <p class="text-[10px] text-zinc-500 font-mono">當下預測</p>
             <p class="text-xs font-bold font-mono
               {% if rt.current_mins < rt.ideal_mins * 1.05 %}text-green-400
               {% elif rt.current_mins < rt.ideal_mins * 1.15 %}text-yellow-400
@@ -51,7 +51,7 @@
           </div>
           {% if rt.delta_mins > 0 %}
           <div class="text-right">
-            <p class="text-[10px] text-slate-500 font-mono">休息可省</p>
+            <p class="text-[10px] text-zinc-500 font-mono">休息可省</p>
             <p class="text-xs font-mono text-cyan-400">−{{ rt.delta_mins }} 分</p>
           </div>
           {% endif %}
@@ -59,7 +59,7 @@
 
         <!-- 箭頭 -->
         <svg
-          class="benchmark-chevron w-4 h-4 text-slate-500 flex-shrink-0 transition-transform duration-200 group-hover:text-slate-300"
+          class="benchmark-chevron w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-200 group-hover:text-zinc-300"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
         >
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
@@ -73,7 +73,7 @@
       >
         <!-- 手機版補充數據 -->
         <div class="sm:hidden mb-3 flex flex-wrap gap-3 text-xs font-mono">
-          <span class="text-slate-400">{{ rt.distance_km }} km · {{ rt.elevation_m }} m↑</span>
+          <span class="text-zinc-400">{{ rt.distance_km }} km · {{ rt.elevation_m }} m↑</span>
           <span class="{% if rt.current_mins < rt.ideal_mins * 1.05 %}text-green-400{% elif rt.current_mins < rt.ideal_mins * 1.15 %}text-yellow-400{% else %}text-red-400{% endif %}">{{ rt.current_time }}</span>
           {% if rt.delta_mins > 0 %}<span class="text-cyan-400">休息可省 −{{ rt.delta_mins }} 分</span>{% endif %}
         </div>
@@ -81,11 +81,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-1">
 
           <!-- 我的預測 -->
-          <div class="bg-slate-800/50 rounded-xl p-4">
-            <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-3 font-mono">我的預測</p>
+          <div class="bg-zinc-800/50 rounded-xl p-4">
+            <p class="text-[10px] uppercase tracking-widest text-zinc-500 mb-3 font-mono">我的預測</p>
             <div class="grid grid-cols-2 gap-3">
-              <div class="bg-slate-900 rounded-lg p-3">
-                <p class="text-[10px] text-slate-500 mb-1">當下狀態</p>
+              <div class="bg-zinc-900 rounded-lg p-3">
+                <p class="text-[10px] text-zinc-500 mb-1">當下狀態</p>
                 <span class="text-[10px] font-mono
                   {% if rt.current_tsb > 0 %}text-green-500
                   {% elif rt.current_tsb > -10 %}text-yellow-500
@@ -101,11 +101,11 @@
                   </span>
                 </div>
                 {% if rt.current_speed %}
-                <p class="text-[10px] text-slate-600 mt-1">{{ rt.current_speed }} km/h</p>
+                <p class="text-[10px] text-zinc-600 mt-1">{{ rt.current_speed }} km/h</p>
                 {% endif %}
               </div>
-              <div class="bg-slate-900 rounded-lg p-3">
-                <p class="text-[10px] text-slate-500 mb-1">充分休息後</p>
+              <div class="bg-zinc-900 rounded-lg p-3">
+                <p class="text-[10px] text-zinc-500 mb-1">充分休息後</p>
                 <span class="text-[10px] font-mono text-green-500">TSB +15</span>
                 <div class="mt-1.5">
                   <span class="text-base font-black font-mono leading-none text-green-400">
@@ -125,25 +125,25 @@
           </div>
 
           <!-- 突破目標 -->
-          <div class="bg-slate-800/50 rounded-xl p-4">
-            <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-3 font-mono">突破目標</p>
+          <div class="bg-zinc-800/50 rounded-xl p-4">
+            <p class="text-[10px] uppercase tracking-widest text-zinc-500 mb-3 font-mono">突破目標</p>
             {% if rt.subx %}
             <div class="space-y-2">
               {% for item in rt.subx %}
               <div class="flex items-center justify-between rounded-lg px-3 py-2.5
                 {% if item.achievable %}bg-green-500/10 border border-green-500/20
-                {% else %}bg-slate-900 border border-slate-700{% endif %}">
+                {% else %}bg-zinc-900 border border-white/10{% endif %}">
                 <div class="flex items-center gap-2">
                   {% if item.achievable %}
                   <svg class="w-3.5 h-3.5 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                   </svg>
                   {% else %}
-                  <svg class="w-3.5 h-3.5 text-slate-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg class="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                   </svg>
                   {% endif %}
-                  <span class="text-xs {% if item.achievable %}text-green-300{% else %}text-slate-400{% endif %}">
+                  <span class="text-xs {% if item.achievable %}text-green-300{% else %}text-zinc-400{% endif %}">
                     {{ item.label }}
                   </span>
                 </div>
@@ -152,7 +152,7 @@
                     {{ item.req_ftp }}W
                   </span>
                   {% if not item.achievable %}
-                  <p class="text-[10px] text-slate-600 font-mono">+{{ item.gap_ftp }}W 差距</p>
+                  <p class="text-[10px] text-zinc-600 font-mono">+{{ item.gap_ftp }}W 差距</p>
                   {% else %}
                   <p class="text-[10px] text-green-600 font-mono">已達成</p>
                   {% endif %}
@@ -161,31 +161,31 @@
               {% endfor %}
             </div>
             {% else %}
-            <div class="flex flex-col items-center justify-center h-24 text-slate-600">
+            <div class="flex flex-col items-center justify-center h-24 text-zinc-600">
               <p class="text-xs">需設定體重才能計算</p>
             </div>
             {% endif %}
           </div>
 
           <!-- 推重比對照 -->
-          <div class="bg-slate-800/50 rounded-xl p-4">
-            <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-3 font-mono">推重比對照</p>
+          <div class="bg-zinc-800/50 rounded-xl p-4">
+            <p class="text-[10px] uppercase tracking-widest text-zinc-500 mb-3 font-mono">推重比對照</p>
             {% if rt.w_per_kg and rt.subx %}
             <div class="mb-3 flex items-baseline gap-1.5">
               <span class="text-2xl font-black font-mono text-orange-400">{{ rt.w_per_kg }}</span>
-              <span class="text-xs text-slate-500">W/kg 目前</span>
+              <span class="text-xs text-zinc-500">W/kg 目前</span>
             </div>
             <div class="space-y-3">
               {% for item in rt.subx %}
               {% if item.req_wkg %}
               <div>
                 <div class="flex justify-between items-center mb-1">
-                  <span class="text-[10px] text-slate-500">{{ item.label }}</span>
-                  <span class="text-[10px] font-mono {% if item.achievable %}text-green-400{% else %}text-slate-400{% endif %}">
+                  <span class="text-[10px] text-zinc-500">{{ item.label }}</span>
+                  <span class="text-[10px] font-mono {% if item.achievable %}text-green-400{% else %}text-zinc-400{% endif %}">
                     {{ item.req_wkg }} W/kg
                   </span>
                 </div>
-                <div class="relative h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <div class="relative h-1.5 bg-zinc-700 rounded-full overflow-hidden">
                   {% set pct = [(rt.w_per_kg / item.req_wkg * 100), 100] | min %}
                   <div class="h-full rounded-full transition-all duration-700
                     {% if item.achievable %}bg-green-500{% elif pct > 80 %}bg-yellow-500{% else %}bg-orange-500{% endif %}"
@@ -193,14 +193,14 @@
                   </div>
                 </div>
                 {% if not item.achievable %}
-                <p class="text-[10px] text-slate-600 mt-0.5 font-mono">還差 +{{ item.gap_wkg }} W/kg</p>
+                <p class="text-[10px] text-zinc-600 mt-0.5 font-mono">還差 +{{ item.gap_wkg }} W/kg</p>
                 {% endif %}
               </div>
               {% endif %}
               {% endfor %}
             </div>
             {% else %}
-            <div class="flex flex-col items-center justify-center h-24 text-slate-600">
+            <div class="flex flex-col items-center justify-center h-24 text-zinc-600">
               <p class="text-xs">需設定 FTP 與體重</p>
             </div>
             {% endif %}
@@ -212,7 +212,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="px-5 py-8 text-center text-slate-600">
+  <div class="px-5 py-8 text-center text-zinc-600">
     <p class="text-sm">需設定 FTP 與體重才能計算</p>
   </div>
   {% endif %}

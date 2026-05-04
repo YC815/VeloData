@@ -1,61 +1,61 @@
   <div class="max-w-2xl mx-auto space-y-6">
 
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-      <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-4">Strava 連線</h3>
+    <div class="bg-zinc-900 border border-white/8 rounded-2xl p-5">
+      <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-4">Strava 連線</h3>
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           {% if athlete.profile %}
           <img src="{{ athlete.profile }}" class="w-10 h-10 rounded-full border border-orange-500/60 object-cover" />
           {% else %}
-          <div class="w-10 h-10 rounded-full border border-orange-500/60 bg-slate-800 flex items-center justify-center">
-            <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+          <div class="w-10 h-10 rounded-full border border-orange-500/60 bg-zinc-800 flex items-center justify-center">
+            <svg class="w-5 h-5 text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
             </svg>
           </div>
           {% endif %}
           <div>
-            <div class="text-slate-200 font-semibold">{{ athlete.firstname }} {{ athlete.lastname }}</div>
+            <div class="text-zinc-200 font-semibold">{{ athlete.firstname }} {{ athlete.lastname }}</div>
             <span class="text-xs text-green-400">已連線</span>
           </div>
         </div>
-        <a href="{{ url_for('auth') }}" class="text-xs text-slate-500 hover:text-orange-400 transition">重新授權</a>
+        <a href="{{ url_for('auth') }}" class="text-xs text-zinc-500 hover:text-orange-400 transition">重新授權</a>
       </div>
     </div>
 
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-      <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-4">訓練參數</h3>
+    <div class="bg-zinc-900 border border-white/8 rounded-2xl p-5">
+      <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-4">訓練參數</h3>
       <div class="space-y-4">
         <div>
-          <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">FTP（瓦特）</label>
+          <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">FTP（瓦特）</label>
           <div class="relative">
             <input id="profileFtpInput" type="number" min="1" max="600" value="{{ ftp }}"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-12" />
-            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">W</span>
+              class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-12" />
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">W</span>
           </div>
-          <p class="text-xs text-slate-600 mt-1">功能臨界功率，用於 TSS / IF 計算</p>
+          <p class="text-xs text-zinc-600 mt-1">功能臨界功率，用於 TSS / IF 計算</p>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">體重（公斤）</label>
+          <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">體重（公斤）</label>
           <div class="relative">
             <input id="profileWeightInput" type="number" min="1" max="200" step="0.1" value="{{ weight_kg }}"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14" />
-            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">kg</span>
+              class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14" />
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">kg</span>
           </div>
-          <p class="text-xs text-slate-600 mt-1">用於 W/kg 與武嶺時間預測</p>
+          <p class="text-xs text-zinc-600 mt-1">用於 W/kg 與武嶺時間預測</p>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">車重（公斤）</label>
+          <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">車重（公斤）</label>
           <div class="relative">
             <input id="profileBikeWeightInput" type="number" min="1" max="30" step="0.1" value="{{ bike_weight_kg }}"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14" />
-            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">kg</span>
+              class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 font-mono text-lg focus:outline-none focus:border-orange-500 transition pr-14" />
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">kg</span>
           </div>
-          <p class="text-xs text-slate-600 mt-1">含輪組、水壺架、補給等配件，預測時系統重 = 體重 + 車重</p>
+          <p class="text-xs text-zinc-600 mt-1">含輪組、水壺架、補給等配件，預測時系統重 = 體重 + 車重</p>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5">時區</label>
+          <label class="block text-xs text-zinc-400 uppercase tracking-widest mb-1.5">時區</label>
           <select id="profileTimezoneSelect"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-orange-500 transition">
+            class="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:border-orange-500 transition">
             {% if used_timezones %}
             <optgroup label="曾使用的時區">
               {% for tz in used_timezones %}
@@ -69,7 +69,7 @@
               {% endfor %}
             </optgroup>
           </select>
-          <p class="text-xs text-slate-600 mt-1">影響本週統計與 PMC 圖表的日期邊界</p>
+          <p class="text-xs text-zinc-600 mt-1">影響本週統計與 PMC 圖表的日期邊界</p>
         </div>
       </div>
       <div class="mt-6">
@@ -82,9 +82,9 @@
       </div>
     </div>
 
-    <div class="bg-slate-900/40 border border-slate-800 border-dashed rounded-2xl p-6">
-      <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-2">裝置設定</h3>
-      <p class="text-slate-600 text-sm">功率計裝置設定開發中</p>
+    <div class="bg-zinc-900/40 border border-white/8 border-dashed rounded-2xl p-6">
+      <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-2">裝置設定</h3>
+      <p class="text-zinc-600 text-sm">功率計裝置設定開發中</p>
     </div>
 
   </div>

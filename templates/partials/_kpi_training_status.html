@@ -1,5 +1,5 @@
-<div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
-  <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-3">訓練狀態</h3>
+<div class="bg-zinc-900 p-5 rounded-2xl border border-white/8 shadow-xl">
+  <h3 class="text-zinc-400 text-xs uppercase tracking-widest mb-3">訓練狀態</h3>
   <div class="flex items-center gap-2 mb-2">
     <div class="w-3 h-3 rounded-full {{ tsb_status.tw_class }} flex-shrink-0"></div>
     <span class="text-2xl font-black font-mono
@@ -9,9 +9,9 @@
       {% else %}text-red-400{% endif %}">
       {% if pmc.current_tsb > 0 %}+{% endif %}{{ pmc.current_tsb }}
     </span>
-    <span class="text-xs text-slate-500">TSB</span>
+    <span class="text-xs text-zinc-500">TSB</span>
   </div>
-  <p class="text-xs text-slate-400 mb-4">{{ tsb_status.label }}</p>
+  <p class="text-xs text-zinc-400 mb-4">{{ tsb_status.label }}</p>
   <div class="flex gap-2 flex-wrap">
     <span class="bg-blue-900/40 border border-blue-800/50 text-blue-300 text-xs px-2 py-0.5 rounded-full font-mono">
       CTL {{ pmc.current_ctl }}

@@ -1,8 +1,8 @@
 <!-- 單一賽事卡片，需要 event 變數 -->
-<div class="bg-slate-900 border rounded-2xl p-4 shadow-lg
+<div class="bg-zinc-900 border rounded-2xl p-4 shadow-lg
   {% if event.priority == 'A' %}border-orange-500/40
   {% elif event.priority == 'B' %}border-blue-500/30
-  {% else %}border-slate-700{% endif %}">
+  {% else %}border-white/10{% endif %}">
 
   <!-- 標頭：優先級 + 名稱 -->
   <div class="flex items-start justify-between mb-3">
@@ -10,10 +10,10 @@
       <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono
         {% if event.priority == 'A' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
         {% elif event.priority == 'B' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
-        {% else %}bg-slate-700 text-slate-400{% endif %}">
+        {% else %}bg-zinc-700 text-zinc-400{% endif %}">
         {{ event.priority }}
       </span>
-      <h4 class="text-sm font-semibold text-slate-200">{{ event.name }}</h4>
+      <h4 class="text-sm font-semibold text-zinc-200">{{ event.name }}</h4>
     </div>
     {% if event.days_until is not none %}
     <div class="text-right flex-shrink-0 ml-2">
@@ -24,15 +24,15 @@
       {% elif event.days_until <= 30 %}
         <span class="text-[10px] font-mono text-yellow-400">{{ event.days_until }}天後</span>
       {% else %}
-        <span class="text-[10px] font-mono text-slate-500">{{ event.days_until }}天後</span>
+        <span class="text-[10px] font-mono text-zinc-500">{{ event.days_until }}天後</span>
       {% endif %}
-      <p class="text-[10px] text-slate-600">{{ event.date_display }}</p>
+      <p class="text-[10px] text-zinc-600">{{ event.date_display }}</p>
     </div>
     {% endif %}
   </div>
 
   <!-- 路線資訊 -->
-  <div class="flex items-center gap-3 mb-3 text-[11px] text-slate-500">
+  <div class="flex items-center gap-3 mb-3 text-[11px] text-zinc-500">
     {% if event.distance_km %}
     <span class="flex items-center gap-1">
       <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -1,11 +1,11 @@
-<nav id="navTabs" class="flex gap-1 mb-8 bg-slate-900/40 border border-slate-800 rounded-2xl p-1">
+<nav id="navTabs" class="flex gap-1 mb-8 bg-zinc-900/40 border border-white/8 rounded-2xl p-1">
   <button
      hx-get="/partials/dashboard"
      hx-target="#content"
      hx-push-url="/"
      hx-on:click="setActiveTab(this)"
      class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition nav-tab
-       {% if active_tab == 'dashboard' %}bg-orange-500 text-white shadow active{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+       {% if active_tab == 'dashboard' %}bg-orange-500 text-white shadow active{% else %}text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800{% endif %}">
     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
     </svg>
@@ -17,7 +17,7 @@
      hx-push-url="/analysis"
      hx-on:click="setActiveTab(this)"
      class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition nav-tab
-       {% if active_tab == 'analysis' %}bg-orange-500 text-white shadow active{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+       {% if active_tab == 'analysis' %}bg-orange-500 text-white shadow active{% else %}text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800{% endif %}">
     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4v16"/>
     </svg>
@@ -29,7 +29,7 @@
      hx-push-url="/racing"
      hx-on:click="setActiveTab(this)"
      class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition nav-tab
-       {% if active_tab == 'racing' %}bg-orange-500 text-white shadow active{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+       {% if active_tab == 'racing' %}bg-orange-500 text-white shadow active{% else %}text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800{% endif %}">
     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
     </svg>
@@ -41,7 +41,7 @@
      hx-push-url="/profile"
      hx-on:click="setActiveTab(this)"
      class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition nav-tab
-       {% if active_tab == 'profile' %}bg-orange-500 text-white shadow active{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+       {% if active_tab == 'profile' %}bg-orange-500 text-white shadow active{% else %}text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800{% endif %}">
     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </svg>
@@ -52,9 +52,9 @@
   function setActiveTab(el) {
     document.querySelectorAll('#navTabs .nav-tab').forEach(t => {
       t.classList.remove('bg-orange-500', 'text-white', 'shadow', 'active');
-      t.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800');
+      t.classList.add('text-zinc-400', 'hover:text-zinc-200', 'hover:bg-zinc-800');
     });
     el.classList.add('bg-orange-500', 'text-white', 'shadow', 'active');
-    el.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800');
+    el.classList.remove('text-zinc-400', 'hover:text-zinc-200', 'hover:bg-zinc-800');
   }
 </script>
