@@ -94,7 +94,10 @@ def _migrate_add_column_if_missing(engine, table, column, col_type):
 
 
 def init_db(app):
-    db_path = os.path.join(os.path.dirname(__file__), 'velodata.db')
+    db_path = os.getenv(
+        'DATABASE_PATH',
+        os.path.join(os.path.dirname(__file__), 'velodata.db')
+    )
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
