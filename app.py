@@ -17,7 +17,7 @@ init_db(app)
 
 STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize"
 STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token"
-REDIRECT_URI = "http://localhost:8000/callback"
+REDIRECT_URI = os.getenv('STRAVA_REDIRECT_URI', 'http://localhost:8000/callback')
 
 BIKE_SPORT_TYPES = {
     'Ride', 'MountainBikeRide', 'GravelRide', 'VirtualRide',
