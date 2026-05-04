@@ -1,6 +1,9 @@
 import os
+import logging
 from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
+
+logger = logging.getLogger(__name__)
 
 db = SQLAlchemy()
 
@@ -98,11 +101,21 @@ def init_db(app):
         'DATABASE_PATH',
         os.path.join(os.path.dirname(__file__), 'velodata.db')
     )
+    db_dir = os.path.dirname(os.path.abspath(db_path))
+    if not os.path.exists(db_dir):
+        logger.info("Creating DB directory: %s", db_dir)
+        os.makedirs(db_dir, exist_ok=True)
+
+    logger.info("Using SQLite DB at: %s", db_path)
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            logger.error("db.create_all() failed: %s", e, exc_info=True)
+            raise
         engine = db.engine
         _migrate_add_column_if_missing(engine, 'user_profile', 'export_cache', 'TEXT')
         _migrate_add_column_if_missing(engine, 'user_profile', 'export_cache_at', 'DATETIME')
