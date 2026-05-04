@@ -1,4 +1,5 @@
 {% set w_per_kg = (ftp / weight_kg) | round(2) if weight_kg else none %}
+{% set system_kg = (weight_kg + bike_weight_kg) | round(1) if weight_kg and bike_weight_kg else none %}
 
 <div class="space-y-4">
 
@@ -49,8 +50,8 @@
         <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">FTP <span class="normal-case font-normal text-zinc-600">W</span></p>
       </div>
       <div class="px-5 py-4">
-        <p class="text-3xl font-black font-mono tracking-tight leading-none text-zinc-100">{{ weight_kg }}</p>
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">體重 <span class="normal-case font-normal text-zinc-600">kg</span></p>
+        <p class="text-3xl font-black font-mono tracking-tight leading-none text-zinc-100">{{ system_kg or '—' }}</p>
+        <p class="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-2">系統重 <span class="normal-case font-normal text-zinc-600">kg</span></p>
       </div>
       <div class="px-5 py-4">
         {% if w_per_kg %}
