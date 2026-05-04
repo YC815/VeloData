@@ -9,6 +9,7 @@ import pytz
 from db import db, UserProfile, RaceEvent, init_db
 from wuling_engine import WulingPredictor, ROUTE_DISTANCE_KM, calc_subx_ftp
 from predictor import RoutePredictor, load_route, list_routes, calc_subx_ftp as _route_calc_subx_ftp
+from ftp_calibration import estimate_ftp
 
 load_dotenv()
 app = Flask(__name__)
@@ -88,24 +89,16 @@ def fetch_activities_90d(header):
     return resp.json()
 
 
-_activity_cache: list | None = None
-_activity_cache_at: datetime | None = None
-_ACTIVITY_CACHE_TTL = 300  # 5 分鐘
-
-
-def _fetch_activities_cached(header: dict) -> list | None:
-    global _activity_cache, _activity_cache_at
-    now = datetime.now()
-    if (
-        _activity_cache is not None
-        and _activity_cache_at is not None
-        and (now - _activity_cache_at).total_seconds() < _ACTIVITY_CACHE_TTL
-    ):
-        return _activity_cache
+def _fetch_activities_cached(header: dict, force: bool = False) -> list | None:
+    import json as _json
+    profile = get_user_profile()
+    if not force and profile.is_activities_cache_valid():
+        return _json.loads(profile.activities_cache)
     data = fetch_activities_90d(header)
     if data is not None:
-        _activity_cache = data
-        _activity_cache_at = now
+        profile.activities_cache = _json.dumps(data, ensure_ascii=False)
+        profile.activities_cache_at = datetime.utcnow()
+        db.session.commit()
     return data
 
 
@@ -498,6 +491,18 @@ def api_profile_put():
         except pytz.UnknownTimeZoneError:
             return jsonify({'error': f'不支援的時區：{tz_str}'}), 400
 
+    # FTP 有變動時，同步更新 ftp_suggest_cache 裡的 ftp_current / delta
+    if ftp is not None and profile.ftp_suggest_cache:
+        import json as _json
+        try:
+            cached = _json.loads(profile.ftp_suggest_cache)
+            new_ftp = profile.ftp_watts
+            cached['ftp_current'] = new_ftp
+            cached['delta'] = cached.get('ftp_final', new_ftp) - new_ftp
+            profile.ftp_suggest_cache = _json.dumps(cached, ensure_ascii=False)
+        except Exception:
+            pass
+
     db.session.commit()
     return jsonify(profile.to_dict())
 
@@ -595,6 +600,263 @@ def api_events_delete(event_id):
     db.session.delete(ev)
     db.session.commit()
     return jsonify({'ok': True})
+
+
+@app.route('/api/ftp-suggest', methods=['GET'])
+def api_ftp_suggest_get():
+    """回傳 DB 中的快取估算結果，無快取時回傳 null。"""
+    import json as _json
+    profile = get_user_profile()
+    if not profile.ftp_suggest_cache or not profile.ftp_suggest_at:
+        return jsonify(None)
+    data = _json.loads(profile.ftp_suggest_cache)
+    data['generated_at'] = profile.ftp_suggest_at.strftime('%Y/%m/%d %H:%M')
+    return jsonify(data)
+
+
+@app.route('/api/ftp-suggest', methods=['POST'])
+def api_ftp_suggest_post():
+    """重新估算 MMP FTP，結果寫入 DB，回傳新結果。物理逆推由 /api/ftp-physics 單獨處理。"""
+    import json as _json
+
+    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+        return jsonify({'error': '未授權'}), 401
+
+    try:
+        access_token = refresh_strava_token()
+    except requests.HTTPError:
+        return jsonify({'error': 'Token 刷新失敗'}), 401
+
+    header = {'Authorization': f'Bearer {access_token}'}
+    acts_raw = _fetch_activities_cached(header)
+    if acts_raw is None:
+        return jsonify({'error': '無法取得活動資料'}), 401
+
+    profile = get_user_profile()
+    ftp = profile.ftp_watts
+    weight_kg = profile.weight_kg or 70.0
+    bike_weight_kg = profile.bike_weight_kg or 8.0
+
+    pmc = calc_pmc(acts_raw, ftp, profile.timezone)
+    tsb = pmc['current_tsb']
+
+    # 嘗試沿用已有的物理逆推快取結果
+    ftp_physics = None
+    if profile.ftp_suggest_cache:
+        try:
+            cached = _json.loads(profile.ftp_suggest_cache)
+            ftp_physics = cached.get('ftp_physics')
+        except Exception:
+            pass
+
+    result = estimate_ftp(
+        acts_raw=acts_raw,
+        current_ftp=ftp,
+        weight_kg=weight_kg,
+        tsb=tsb,
+        bike_weight_kg=bike_weight_kg,
+        ftp_physics=ftp_physics,
+    )
+
+    if not result.get('ok'):
+        return jsonify({'error': result.get('error', '估算失敗')}), 422
+
+    now = datetime.utcnow()
+    cache_str = _json.dumps(result, ensure_ascii=False)
+    profile.ftp_suggest_cache = cache_str
+    profile.ftp_suggest_at = now
+    db.session.commit()
+
+    result['generated_at'] = now.strftime('%Y/%m/%d %H:%M')
+    return jsonify(result)
+
+
+@app.route('/api/ftp-physics', methods=['POST'])
+def api_ftp_physics_post():
+    """
+    對指定活動 + 路段做物理逆推，回傳逆推 FTP。
+    Request JSON: {activity_id: int, route_id: str}
+    """
+    import json as _json
+    from ftp_calibration import _find_segment_effort, _SEGMENT_ROUTE_MAP
+
+    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+        return jsonify({'error': '未授權'}), 401
+
+    data = request.get_json(force=True)
+    activity_id = data.get('activity_id')
+    route_id = data.get('route_id')
+
+    if not activity_id or not route_id:
+        return jsonify({'error': '缺少 activity_id 或 route_id'}), 400
+
+    route = load_route(route_id)
+
+    try:
+        access_token = refresh_strava_token()
+    except requests.HTTPError:
+        return jsonify({'error': 'Token 刷新失敗'}), 401
+
+    header = {'Authorization': f'Bearer {access_token}'}
+    resp = requests.get(
+        f'https://www.strava.com/api/v3/activities/{activity_id}',
+        headers=header,
+        timeout=15,
+    )
+    if not resp.ok:
+        return jsonify({'error': f'無法取得活動資料（{resp.status_code}）'}), 502
+
+    detailed = resp.json()
+
+    # 若路線有 strava_segment_id，從 segment_efforts 找精確路段時間
+    elapsed_sec = None
+    sid = route.get('strava_segment_id')
+    if sid:
+        effort, _ = _find_segment_effort(detailed) or (None, None)
+        if effort:
+            elapsed_sec = effort.get('elapsed_time')
+
+    # 無路段時間則退而用整趟 moving_time
+    if not elapsed_sec:
+        elapsed_sec = detailed.get('moving_time')
+
+    if not elapsed_sec:
+        return jsonify({'error': '無法取得活動時間'}), 422
+
+    profile = get_user_profile()
+    weight_kg = profile.weight_kg or 70.0
+    bike_weight_kg = profile.bike_weight_kg or 8.0
+
+    acts_raw = _fetch_activities_cached(header)
+    pmc = calc_pmc(acts_raw or [], profile.ftp_watts, profile.timezone)
+    tsb = pmc['current_tsb']
+
+    req_ftp = _route_calc_subx_ftp(
+        route=route,
+        target_minutes=elapsed_sec / 60,
+        weight_kg=weight_kg,
+        tsb=tsb,
+        bike_weight_kg=bike_weight_kg,
+    )
+
+    # 更新快取中的物理逆推結果
+    physics_detail = {
+        'ftp_physics': req_ftp,
+        'matched_route_name': route['name'],
+        'basis_activities': [{
+            'activity_name': detailed.get('name', '未命名'),
+            'activity_id': activity_id,
+            'activity_date': detailed.get('start_date_local', '')[:10],
+            'duration_sec': elapsed_sec,
+            'route_name': route['name'],
+            'route_id': route_id,
+            'req_ftp': req_ftp,
+        }],
+    }
+
+    if profile.ftp_suggest_cache:
+        try:
+            cached = _json.loads(profile.ftp_suggest_cache)
+            cached['ftp_physics'] = req_ftp
+            cached['physics_detail'] = physics_detail
+            # 重算加權 FTP
+            ftp_mmp = cached.get('ftp_mmp')
+            if ftp_mmp:
+                cached['ftp_final'] = round(ftp_mmp * 0.60 + req_ftp * 0.40)
+                cached['delta'] = cached['ftp_final'] - cached['ftp_current']
+                cached['weights'] = {'mmp': 0.60, 'physics': 0.40}
+            profile.ftp_suggest_cache = _json.dumps(cached, ensure_ascii=False)
+            db.session.commit()
+        except Exception:
+            pass
+
+    return jsonify({
+        'ftp_physics': req_ftp,
+        'elapsed_sec': elapsed_sec,
+        'route_name': route['name'],
+        'activity_name': detailed.get('name', '未命名'),
+        'physics_detail': physics_detail,
+    })
+
+
+@app.route('/api/activities-with-power', methods=['GET'])
+def api_activities_with_power():
+    """回傳近 90 天有功率計的活動精簡列表，供物理逆推選單使用。"""
+    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+        return jsonify({'error': '未授權'}), 401
+
+    try:
+        access_token = refresh_strava_token()
+    except requests.HTTPError:
+        return jsonify({'error': 'Token 刷新失敗'}), 401
+
+    header = {'Authorization': f'Bearer {access_token}'}
+    acts_raw = _fetch_activities_cached(header)
+    if acts_raw is None:
+        return jsonify([])
+
+    result = []
+    for act in sorted(acts_raw, key=lambda a: a.get('start_date', ''), reverse=True):
+        if not act.get('device_watts'):
+            continue
+        local_dt = act.get('start_date_local', '')[:10]
+        result.append({
+            'id': act['id'],
+            'name': act.get('name', '未命名'),
+            'date': local_dt,
+            'moving_time': act.get('moving_time', 0),
+            'distance_km': round(act.get('distance', 0) / 1000, 1),
+            'elevation_m': round(act.get('total_elevation_gain', 0)),
+        })
+    return jsonify(result)
+
+
+@app.route('/api/routes', methods=['GET'])
+def api_routes():
+    """回傳系統已知路線列表，供物理逆推路段選單使用。"""
+    result = []
+    for meta in list_routes():
+        route = load_route(meta['id'])
+        result.append({
+            'id': route['id'],
+            'name': route['name'],
+            'distance_km': route['distance_km'],
+            'elevation_m': route['elevation_m'],
+        })
+    return jsonify(result)
+
+
+@app.route('/api/activities/cache-info', methods=['GET'])
+def api_activities_cache_info():
+    profile = get_user_profile()
+    cached_at = profile.activities_cache_at
+    return jsonify({
+        'cached_at': cached_at.strftime('%Y/%m/%d %H:%M') if cached_at else None,
+        'valid': profile.is_activities_cache_valid(),
+    })
+
+
+@app.route('/api/activities/refresh', methods=['POST'])
+def api_activities_refresh():
+    if not os.getenv('STRAVA_REFRESH_TOKEN'):
+        return jsonify({'error': '未授權'}), 401
+    try:
+        access_token = refresh_strava_token()
+    except requests.HTTPError:
+        return jsonify({'error': 'Token 刷新失敗'}), 401
+
+    header = {'Authorization': f'Bearer {access_token}'}
+    data = _fetch_activities_cached(header, force=True)
+    if data is None:
+        return jsonify({'error': '無法取得活動資料'}), 401
+
+    profile = get_user_profile()
+    cached_at = profile.activities_cache_at
+    return jsonify({
+        'ok': True,
+        'count': len(data),
+        'cached_at': cached_at.strftime('%Y/%m/%d %H:%M') if cached_at else None,
+    })
 
 
 @app.route('/')
