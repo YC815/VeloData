@@ -57,6 +57,10 @@ def _clear_refresh_token():
 
 
 def refresh_strava_token():
+    profile = get_user_profile()
+    if profile.is_access_token_valid():
+        return profile.strava_access_token
+
     resp = requests.post(
         STRAVA_TOKEN_URL,
         data={
@@ -68,9 +72,11 @@ def refresh_strava_token():
     )
     resp.raise_for_status()
     data = resp.json()
-    new_refresh = data.get('refresh_token')
-    if new_refresh:
-        _save_refresh_token(new_refresh)
+    if data.get('refresh_token'):
+        profile.strava_refresh_token = data['refresh_token']
+    profile.strava_access_token = data['access_token']
+    profile.strava_access_token_expires_at = data.get('expires_at')
+    db.session.commit()
     return data['access_token']
 
 
@@ -369,6 +375,7 @@ def enrich_activity(act, ftp):
 
 def _require_strava():
     """Returns (header, athlete, profile, redirect_response). redirect_response is non-None on auth failure."""
+    import json as _json
     if not _get_refresh_token():
         return None, None, None, redirect(url_for('auth'))
     try:
@@ -379,9 +386,17 @@ def _require_strava():
             return None, None, None, redirect(url_for('auth'))
         raise
     header = {'Authorization': f'Bearer {access_token}'}
-    athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
-    athlete_resp.raise_for_status()
-    return header, athlete_resp.json(), get_user_profile(), None
+    profile = get_user_profile()
+    if profile.is_athlete_cache_valid():
+        athlete = _json.loads(profile.athlete_cache)
+    else:
+        athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
+        athlete_resp.raise_for_status()
+        athlete = athlete_resp.json()
+        profile.athlete_cache = _json.dumps(athlete, ensure_ascii=False)
+        profile.athlete_cache_at = datetime.utcnow()
+        db.session.commit()
+    return header, athlete, profile, None
 
 
 def _extract_used_timezones(acts_raw):
@@ -1091,9 +1106,16 @@ def api_export_for_ai():
 
     header = {'Authorization': f'Bearer {access_token}'}
 
-    athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
-    athlete_resp.raise_for_status()
-    athlete = athlete_resp.json()
+    import json as _json_inner
+    if profile.is_athlete_cache_valid():
+        athlete = _json_inner.loads(profile.athlete_cache)
+    else:
+        athlete_resp = requests.get("https://www.strava.com/api/v3/athlete", headers=header)
+        athlete_resp.raise_for_status()
+        athlete = athlete_resp.json()
+        profile.athlete_cache = _json_inner.dumps(athlete, ensure_ascii=False)
+        profile.athlete_cache_at = datetime.utcnow()
+        db.session.commit()
 
     acts_raw = _fetch_activities_cached(header)
     if acts_raw is None:

@@ -12,6 +12,8 @@ DEFAULT_WEIGHT = 70.0
 DEFAULT_BIKE_WEIGHT = 8.0
 EXPORT_CACHE_TTL_MINUTES = 60
 ACTIVITIES_CACHE_TTL_MINUTES = 120
+ATHLETE_CACHE_TTL_MINUTES = 60
+ACCESS_TOKEN_BUFFER_SECONDS = 300
 
 
 class UserProfile(db.Model):
@@ -28,6 +30,22 @@ class UserProfile(db.Model):
     activities_cache = db.Column(db.Text, nullable=True)
     activities_cache_at = db.Column(db.DateTime, nullable=True)
     strava_refresh_token = db.Column(db.String(256), nullable=True)
+    strava_access_token = db.Column(db.String(512), nullable=True)
+    strava_access_token_expires_at = db.Column(db.Integer, nullable=True)
+    athlete_cache = db.Column(db.Text, nullable=True)
+    athlete_cache_at = db.Column(db.DateTime, nullable=True)
+
+    def is_access_token_valid(self) -> bool:
+        import time
+        if not self.strava_access_token or not self.strava_access_token_expires_at:
+            return False
+        return self.strava_access_token_expires_at - time.time() > ACCESS_TOKEN_BUFFER_SECONDS
+
+    def is_athlete_cache_valid(self) -> bool:
+        if not self.athlete_cache or not self.athlete_cache_at:
+            return False
+        age_minutes = (datetime.utcnow() - self.athlete_cache_at).total_seconds() / 60
+        return age_minutes < ATHLETE_CACHE_TTL_MINUTES
 
     def is_activities_cache_valid(self):
         if not self.activities_cache or not self.activities_cache_at:
@@ -125,6 +143,10 @@ def init_db(app):
         _migrate_add_column_if_missing(engine, 'user_profile', 'activities_cache', 'TEXT')
         _migrate_add_column_if_missing(engine, 'user_profile', 'activities_cache_at', 'DATETIME')
         _migrate_add_column_if_missing(engine, 'user_profile', 'strava_refresh_token', 'VARCHAR(256)')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'strava_access_token', 'VARCHAR(512)')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'strava_access_token_expires_at', 'INTEGER')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'athlete_cache', 'TEXT')
+        _migrate_add_column_if_missing(engine, 'user_profile', 'athlete_cache_at', 'DATETIME')
         if not UserProfile.query.first():
             db.session.add(UserProfile(ftp_watts=DEFAULT_FTP, weight_kg=DEFAULT_WEIGHT))
             db.session.commit()
