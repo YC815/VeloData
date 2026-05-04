@@ -23,18 +23,60 @@
       }
       .light-mode [class*="bg-zinc-950"] { background-color: #f4f4f5 !important; }
       .light-mode [class*="bg-zinc-900"] { background-color: #ffffff !important; }
-      .light-mode [class*="bg-zinc-800"] { background-color: #f4f4f5 !important; }
+      .light-mode [class*="bg-zinc-800"] { background-color: #f8f9fa !important; }
+      .light-mode [class*="bg-zinc-700"] { background-color: #e9eaec !important; }
+      /* hover 變體應只在 hover 時生效，不能被上面的規則永遠套用 */
+      .light-mode [class*="hover:bg-zinc-800"] { background-color: transparent !important; }
+      .light-mode [class*="hover:bg-zinc-800"]:hover { background-color: #f0f1f2 !important; }
+      .light-mode [class*="hover:bg-zinc-900"] { background-color: transparent !important; }
+      .light-mode [class*="hover:bg-zinc-900"]:hover { background-color: #f8f9fa !important; }
       .light-mode [class*="border-white/"] { border-color: rgba(0,0,0,0.08) !important; }
+
+      /* zinc 文字色 */
       .light-mode [class*="text-zinc-100"] { color: #09090b !important; }
-      .light-mode [class*="text-zinc-300"] { color: #71717a !important; }
+      .light-mode [class*="text-zinc-200"] { color: #27272a !important; }
+      .light-mode [class*="text-zinc-300"] { color: #52525b !important; }
       .light-mode [class*="text-zinc-400"] { color: #71717a !important; }
       .light-mode [class*="text-zinc-500"] { color: #a1a1aa !important; }
+      .light-mode [class*="text-zinc-600"] { color: #a1a1aa !important; }
+
+      /* 暗色藥丸背景 → 亮色淺色版 */
+      .light-mode [class*="bg-cyan-950"]    { background-color: #ecfeff !important; }
+      .light-mode [class*="bg-orange-950"]  { background-color: #fff7ed !important; }
+      .light-mode [class*="bg-emerald-950"] { background-color: #ecfdf5 !important; }
+      .light-mode [class*="bg-amber-950"]   { background-color: #fffbeb !important; }
+      .light-mode [class*="bg-rose-950"]    { background-color: #fff1f2 !important; }
+
+      /* 暗色藥丸邊框 → 亮色版 */
+      .light-mode [class*="border-cyan-900"]    { border-color: rgba(14, 116, 144, 0.35) !important; }
+      .light-mode [class*="border-orange-900"]  { border-color: rgba(194, 65, 12, 0.35) !important; }
+      .light-mode [class*="border-emerald-900"] { border-color: rgba(4, 120, 87, 0.35) !important; }
+      .light-mode [class*="border-amber-900"]   { border-color: rgba(180, 83, 9, 0.35) !important; }
+      .light-mode [class*="border-rose-900"]    { border-color: rgba(190, 18, 60, 0.35) !important; }
+
+      /* 彩色文字 → 亮色模式加深以維持對比度 */
+      .light-mode [class*="text-cyan-400"]    { color: #0e7490 !important; }
+      .light-mode [class*="text-orange-400"]  { color: #c2410c !important; }
+      .light-mode [class*="text-orange-500"]  { color: #c2410c !important; }
+      .light-mode [class*="text-emerald-400"] { color: #047857 !important; }
+      .light-mode [class*="text-emerald-500"] { color: #047857 !important; }
+      .light-mode [class*="text-emerald-600"] { color: #047857 !important; }
+      .light-mode [class*="text-amber-400"]   { color: #b45309 !important; }
+      .light-mode [class*="text-amber-500"]   { color: #b45309 !important; }
+      .light-mode [class*="text-rose-400"]    { color: #be123c !important; }
+
+      /* 側邊欄 & 導覽 */
       .light-mode aside { background-color: #ffffff !important; border-color: rgba(0,0,0,0.08) !important; }
       .light-mode #mobileNav { background-color: rgba(255,255,255,0.95) !important; border-color: rgba(0,0,0,0.08) !important; }
+
+      /* 保留原始語義色輔助 class */
       .light-mode .ctl-value { color: #0891b2 !important; }
       .light-mode .atl-value { color: #ea580c !important; }
       .light-mode .tsb-positive { color: #059669 !important; }
       .light-mode .tsb-negative { color: #e11d48 !important; }
+
+      /* orange-500 logo 在亮色下維持品牌色 */
+      .light-mode h1.text-orange-500 { color: #ea580c !important; }
       body, aside, nav, main, .bg-zinc-900, .bg-zinc-800, .bg-zinc-950 {
         transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease;
       }
